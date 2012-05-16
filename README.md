@@ -11,8 +11,12 @@ OpenLayers
 
 ## Server
 
-Node.js Modules Dependencies
-----------------------------
+### Node.js Modules Dependencies
+
+buffered-reader
+buffered-writer
 pg
 express
 sprintf
+properties
+jqtpl

@@ -11,7 +11,7 @@
   <artifactId>displaytest</artifactId>
   <version>0.1-SNAPSHOT</version>
 
-    <build>
+  <build>
     <plugins>
 
       <plugin>
@@ -40,14 +40,28 @@
                   <arg value="-a"/>
                   <arg value="-e ssh"/>
                   <arg value="./src"/>
-                  <arg value="${host.user}@${host}:${host.dir}/vtile"/>
+                  <arg value="${host.user}@${host}:${host.dir}/map-rendering-test"/>
                 </exec>
-                <!-- 
-                <exec executable="ssh" dir="." failonerror="true">
-                  <arg value="${host.user}@${host}"/>
-                  <arg value='sudo su postgres; sudo psql -d ${db.name} -U ${db.user} -c "copy(SELECT wkb_geometry, ogc_fid, state_code FROM lga06aaust WHERE ogc_fid = 10 OR ogc_fid = 47) to stdin" > /tmp/lga06aaust.dmp'/>
+                <!-- <exec executable="ssh" dir="." failonerror="true"> <arg value="${host.user}@${host}"/> 
+                  <arg value='sudo su postgres; sudo psql -d ${db.name} -U ${db.user} -c "copy(SELECT wkb_geometry, 
+                  ogc_fid, state_code FROM lga06aaust WHERE ogc_fid = 10 OR ogc_fid = 47) to stdin" > /tmp/lga06aaust.dmp'/> 
+                  </exec> -->
+              </target>
+            </configuration>
+          </execution>
+          
+          <!-- Starts Node.js -->
+          <execution>
+            <id>run</id>
+            <phase>install</phase>
+            <goals>
+              <goal>run</goal>
+            </goals>
+            <configuration>
+              <target id="run-nodejs">
+                <exec executable="node" dir="." failonerror="true">
+                  <arg value="./src/server/app.js"/>
                 </exec>
-                 -->
               </target>
             </configuration>
           </execution>
@@ -62,7 +76,7 @@
           <!-- Loads AURIN common property files -->
           <execution>
             <id>read-properties</id>
-            <phase>initialize</phase>
+            <phase>generate-resources</phase>
             <goals>
               <goal>read-project-properties</goal>
             </goals>
@@ -72,6 +86,17 @@
                 <file>../aurin-properties/deployments/${deployment}.properties</file>
                 <file>../aurin-properties/systems/${system}.properties</file>
               </files>
+            </configuration>
+          </execution>
+          <execution>
+            <phase>generate-resources</phase>
+            <goals>
+              <goal>write-project-properties</goal>
+            </goals>
+            <configuration>
+              <outputFile>
+                ${project.build.outputDirectory}/app.properties
+              </outputFile>
             </configuration>
           </execution>
         </executions>

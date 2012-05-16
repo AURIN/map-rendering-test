@@ -1,0 +1,31 @@
+<!--
+  Body of the home page 
+ -->
+Postgis host:
+<input type="text" id="host" value="localhost" />
+db:
+<input type="text" id="db" value="geo2" />
+port:
+<input type="text" id="port" value="5432" />
+user:
+<input type="text" id="user" value="pguser" />
+password:
+<input type="text" id="password" value="p1rr1cw1n" />
+<br />
+
+Table:
+<input type="text" id="table" value="lga11aaustgen010" />
+Feature Key Column:
+<input type="text" id="key" value="lga_code11" />
+Feature Geometry Column:
+<input type="text" id="geom" value="wkb_geometry" />
+<br />
+
+<input type="button" value="refresh" onclick="refresh()" />
+<br>
+
+<textarea id="logconsole" style="width: 1024; height: 100">
+</textarea>
+
+<div id="map" style="width: 1024; height: 500">
+</div>
