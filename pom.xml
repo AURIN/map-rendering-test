@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- pom.xml VTile is a vector generalization-cum-tiling PL/pgSQL library. -->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+  <modelVersion>4.0.0</modelVersion>
+  <packaging>jar</packaging>
+
+  <name>vtile</name>
+  <groupId>org.aurin</groupId>
+  <artifactId>displaytest</artifactId>
+  <version>0.1-SNAPSHOT</version>
+
+    <build>
+    <plugins>
+
+      <plugin>
+        <artifactId>maven-antrun-plugin</artifactId>
+        <groupId>org.apache.maven.plugins</groupId>
+        <version>1.7</version>
+        <dependencies>
+          <dependency>
+            <groupId>ant</groupId>
+            <artifactId>ant-jsch</artifactId>
+            <version>1.6.5</version>
+          </dependency>
+        </dependencies>
+        <executions>
+
+          <!-- Loads source code to host and starts Node.js -->
+          <execution>
+            <id>synchronize</id>
+            <phase>deploy</phase>
+            <goals>
+              <goal>run</goal>
+            </goals>
+            <configuration>
+              <target id="synchronize-src">
+                <exec executable="rsync" dir="." failonerror="true">
+                  <arg value="-a"/>
+                  <arg value="-e ssh"/>
+                  <arg value="./src"/>
+                  <arg value="${host.user}@${host}:${host.dir}/vtile"/>
+                </exec>
+                <!-- 
+                <exec executable="ssh" dir="." failonerror="true">
+                  <arg value="${host.user}@${host}"/>
+                  <arg value='sudo su postgres; sudo psql -d ${db.name} -U ${db.user} -c "copy(SELECT wkb_geometry, ogc_fid, state_code FROM lga06aaust WHERE ogc_fid = 10 OR ogc_fid = 47) to stdin" > /tmp/lga06aaust.dmp'/>
+                </exec>
+                 -->
+              </target>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>properties-maven-plugin</artifactId>
+        <version>1.0-alpha-2</version>
+        <executions>
+          <!-- Loads AURIN common property files -->
+          <execution>
+            <id>read-properties</id>
+            <phase>initialize</phase>
+            <goals>
+              <goal>read-project-properties</goal>
+            </goals>
+            <configuration>
+              <files>
+                <file>../aurin-properties/common.properties</file>
+                <file>../aurin-properties/deployments/${deployment}.properties</file>
+                <file>../aurin-properties/systems/${system}.properties</file>
+              </files>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
+    </plugins>
+  </build>
+
+  <issueManagement>
+    <system>Redmine</system>
+    <url>https://projects.eresearch.unimelb.edu.au/</url>
+  </issueManagement>
+
+  <developers>
+    <developer>
+      <id>LM</id>
+      <name>Luca Morandini</name>
+      <email>lmorandini [you know] unimelb.edu.au</email>
+    </developer>
+
+  </developers>
+
+</project>
