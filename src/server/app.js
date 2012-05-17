@@ -116,8 +116,11 @@ function startServer(props) {
 						var table = req.param("table", "lga11aaustgen005");
 						var featureKey = req.param("key", "lga_code11");
 						var featureGeom = req.param("geom", "wkb_geometry");
-						var bbox = req.param("bbox", null);
 						var callback = req.param("callback", null);
+
+						var bbox = req.param("bbox", null);
+						var zoom = req.param("zoom", null);
+						var epsg = req.param("epsg", null);
 
 						// special callback for OpenLayers
 						var formatOptions = req.param("format_options", null);
@@ -133,6 +136,8 @@ function startServer(props) {
 							port : port
 						};
 
+/*
+						
 						var whereClause = 'TRUE';
 						if (bbox && bbox.length > 0) { // filtering by bbox
 							var coordinates = bbox.split(",");
@@ -141,7 +146,7 @@ function startServer(props) {
 									featureGeom, coordinates[0], coordinates[1], coordinates[2],
 									coordinates[3]);
 						}
-
+*/
 						pg
 								.connect(
 										config,
@@ -152,13 +157,8 @@ function startServer(props) {
 											}
 
 											var sqlCommand = sprintf(
-													"SELECT TRIM(TRAILING ' ' FROM %s) AS %s",
-													featureKey, featureKey);
-											sqlCommand += sprintf(
-													", ST_AsGeoJSON(1,%s,15,1) AS geom_json ",
-													featureGeom);
-											sqlCommand += sprintf("FROM %s WHERE %s", table,
-													whereClause);
+													"select * from Getfeature('lga11', '%s', %s, %s) AS (code INTEGER, geometry TEXT)",
+													bbox, zoom, epsg);
 
 											console.log("pg.connect: " + sqlCommand);
 											var query = client
@@ -169,7 +169,6 @@ function startServer(props) {
 																	console.log(err);
 																	return;
 																}
-																console.log("client.query result: " + result);
 																if (!result || !("rows" in result)) {
 																	resSend(callback, {
 																		"error" : "No result found"
@@ -178,10 +177,10 @@ function startServer(props) {
 																}
 																var jsonOutput = '{"type": "FeatureCollection", "crs":{"type":"name","properties":{"name":"EPSG:4283"}}, "features": [';
 																for ( var i = 0; i < result.rows.length; i++) {
-																	var iFeatureKey = result.rows[i][featureKey];
-																	var iFeature = '{"type": "Feature", "properties":{"feature_code": "'
-																			+ iFeatureKey + '"}';
-																	var geomJson = result.rows[i]["geom_json"]; // this
+																	var iFeatureKey = result.rows[i].code;
+																	var iFeature = '{"type": "Feature", "properties":' +
+																	      '{"FeatureCode": "' + iFeatureKey + '"}';
+																	var geomJson = result.rows[i].geometry; // this
 																																							// is
 																																							// returned
 																																							// as
