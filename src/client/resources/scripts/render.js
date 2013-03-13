@@ -14,7 +14,7 @@ Ext.onReady(function() {
 	// follow google
 	};
 	map = new OpenLayers.Map('map', options);
-  
+
 	var googlePhysical = new OpenLayers.Layer.Google("Google Physical", {
 		"sphericalMercator" : true,
 		type : google.maps.MapTypeId.TERRAIN
@@ -27,9 +27,9 @@ Ext.onReady(function() {
 					.getProjectionObject());
 	map.zoomToExtent(zoomToBounds);
 
-  map.events.register('movestart', map, function (map) {
-  	refresh();
-  });
+	map.events.register('movestart', map, function(map) {
+		refresh();
+	});
 
 });
 
@@ -56,36 +56,28 @@ function refresh() {
 		projection : new OpenLayers.Projection("EPSG:4326"),
 		strategies : [ new OpenLayers.Strategy.BBOX() ],
 		protocol : new OpenLayers.Protocol.Script({
-			url : "/geojson",
+			url : Ext.get("protocol").getValue() + Ext.get("host").getValue() + "/"
+					+ Ext.get("app").getValue() + "/" + Ext.get("feature").getValue()
+					+ "/" + Ext.get("year").getValue(),
 			callbackKey : "format_options", // must be set to this
 			callbackPrefix : "callback:",
 			params : {
-				host : Ext.get("host").getValue(),
-				db : Ext.get("db").getValue(),
-				port : Ext.get("port").getValue(),
-				user : Ext.get("user").getValue(),
-				password : Ext.get("password").getValue(),
-				table : Ext.get("table").getValue(),
-				key : Ext.get("key").getValue(),
-				geom : Ext.get("geom").getValue(),
+				includegeom : "true",
 				zoom : map.zoom,
-				epsg : map.displayProjection.projCode.split(":")[1] // IFXME: displayProjection or projection ?
+				epsg : map.displayProjection.projCode.split(":")[1]
+			// IFXME:
+			// displayProjection
+			// or projection ?
 			}
-/*
-		,
-			filterToParams : function(filter, params) {
-				// example to demonstrate BBOX serialization
-				// bbox=-235.14844954,-55.46555255425,477.11717546,7.6711225881483,EPSG%3A4326
-				if (filter.type === OpenLayers.Filter.Spatial.BBOX) {
-					params.bbox = filter.value.toArray();
-					if (filter.projection) {
-						params.bbox.push(filter.projection.getCode());
-					}
-				}
-				params.zoom = map.zoom;
-				return params;
-			}
- */			
+		/*
+		 * , filterToParams : function(filter, params) { // example to demonstrate
+		 * BBOX serialization //
+		 * bbox=-235.14844954,-55.46555255425,477.11717546,7.6711225881483,EPSG%3A4326
+		 * if (filter.type === OpenLayers.Filter.Spatial.BBOX) { params.bbox =
+		 * filter.value.toArray(); if (filter.projection) {
+		 * params.bbox.push(filter.projection.getCode()); } } params.zoom =
+		 * map.zoom; return params; }
+		 */
 		}),
 		eventListeners : {
 			'loadstart' : function() {
@@ -96,10 +88,12 @@ function refresh() {
 			"loadend" : function() {
 				console.log("LOADEND");
 				end = new Date();
-				var seconds= (end - start) / 1000;
-				var throughput= Math.round(npoints / seconds, 0);
-				Ext.get("logconsole").insertHtml("beforeEnd",
-						"Time: " + seconds + " Geometries: " + ngeoms + " Points: " + npoints + " Throughput: " + throughput + "\n")
+				var seconds = (end - start) / 1000;
+				var throughput = Math.round(npoints / seconds, 0);
+				Ext.get("logconsole").insertHtml(
+						"beforeEnd",
+						"Time: " + seconds + " Geometries: " + ngeoms + " Points: "
+								+ npoints + " Throughput: " + throughput + "\n")
 			},
 			'featureadded' : function(elem) {
 				ngeoms++;

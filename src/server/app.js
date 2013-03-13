@@ -8,7 +8,7 @@
  * Reads settings
  */
 var Properties = require("node-properties");
-var propStore = (new Properties()).load("./target/classes/app.properties",
+var propStore = (new Properties()).load("./src/app.properties",
 		function(err) {
 			if (err != null) {
 				console.log(err);

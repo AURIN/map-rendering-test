@@ -27,29 +27,6 @@
         </dependencies>
         <executions>
 
-          <!-- Loads source code to host and starts Node.js -->
-          <execution>
-            <id>synchronize</id>
-            <phase>deploy</phase>
-            <goals>
-              <goal>run</goal>
-            </goals>
-            <configuration>
-              <target id="synchronize-src">
-                <exec executable="rsync" dir="." failonerror="true">
-                  <arg value="-a"/>
-                  <arg value="-e ssh"/>
-                  <arg value="./src"/>
-                  <arg value="${host.user}@${host}:${host.dir}/map-rendering-test"/>
-                </exec>
-                <!-- <exec executable="ssh" dir="." failonerror="true"> <arg value="${host.user}@${host}"/> 
-                  <arg value='sudo su postgres; sudo psql -d ${db.name} -U ${db.user} -c "copy(SELECT wkb_geometry, 
-                  ogc_fid, state_code FROM lga06aaust WHERE ogc_fid = 10 OR ogc_fid = 47) to stdin" > /tmp/lga06aaust.dmp'/> 
-                  </exec> -->
-              </target>
-            </configuration>
-          </execution>
-          
           <!-- Starts Node.js -->
           <execution>
             <id>run</id>
@@ -68,40 +45,6 @@
         </executions>
       </plugin>
 
-      <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>properties-maven-plugin</artifactId>
-        <version>1.0-alpha-2</version>
-        <executions>
-          <!-- Loads AURIN common property files -->
-          <execution>
-            <id>read-properties</id>
-            <phase>generate-resources</phase>
-            <goals>
-              <goal>read-project-properties</goal>
-            </goals>
-            <configuration>
-              <files>
-                <file>../aurin-properties/common.properties</file>
-                <file>../aurin-properties/deployments/${deployment}.properties</file>
-                <file>../aurin-properties/systems/${system}.properties</file>
-              </files>
-            </configuration>
-          </execution>
-          <execution>
-            <phase>generate-resources</phase>
-            <goals>
-              <goal>write-project-properties</goal>
-            </goals>
-            <configuration>
-              <outputFile>
-                ${project.build.outputDirectory}/app.properties
-              </outputFile>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
-
     </plugins>
   </build>
 
@@ -109,14 +52,5 @@
     <system>Redmine</system>
     <url>https://projects.eresearch.unimelb.edu.au/</url>
   </issueManagement>
-
-  <developers>
-    <developer>
-      <id>LM</id>
-      <name>Luca Morandini</name>
-      <email>lmorandini [you know] unimelb.edu.au</email>
-    </developer>
-
-  </developers>
 
 </project>

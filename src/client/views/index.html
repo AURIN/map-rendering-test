@@ -1,31 +1,39 @@
 <!--
   Body of the home page 
  -->
-Postgis host:
-<input type="text" id="host" value="luca-play" />
-db:
-<input type="text" id="db" value="geo2" />
-port:
-<input type="text" id="port" value="5432" />
-user:
-<input type="text" id="user" value="pguser" />
-password:
-<input type="text" id="password" value="p1rr1cw1n" />
-<br />
+<p>
+  <input type="text" id="protocol" value="https://" /> 
+  <input type="text" id="host" value="dev-api.aurin.org.au" /> 
+  <input type="text" id="app" value="node/feature" /> 
+  <select id="feature" value="country">
+    <option>country</option>
+    <option>state</option>
+    <option>lga</option>
+    <option>sla</option>
+    <option>sa3</option>
+    <option>sa2</option>
+    <option>sa1</option>
+    <option>ssc</option>
+    <option>poa</option>
+    <option>ced</option>
+    <option>ccd</option>
+    <option>fer</option>
+    <option>ffer</option>
+    <option>mfer</option>
+    <option>lsfer</option>
+    <option>sfer</option>
+    <option>tfer</option>
+    <option>bfer</option>
+    <option>rofer</option>
+    <option>cd</option>
+    <option>lfr</option>
+    <option>ucl</option>
+  </select> (CCD are PBC in reality)
+  <input type="text" id="year" value="2006" />
+</p>
 
-Table:
-<input type="text" id="table" value="lga11aaustgen010" />
-Feature Key Column:
-<input type="text" id="key" value="lga_code11" />
-Feature Geometry Column:
-<input type="text" id="geom" value="wkb_geometry" />
-<br />
+<div id="map" style="width: 600; height: 500"></div>
 
-<input type="button" value="refresh" onclick="refresh()" />
-<br>
-
-<textarea id="logconsole" style="width: 1024; height: 100">
+<textarea id="logconsole" style="width: 800; height: 200" style="fontSize:10px">
 </textarea>
-
-<div id="map" style="width: 1024; height: 500">
-</div>
+    
