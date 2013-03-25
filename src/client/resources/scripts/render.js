@@ -151,6 +151,16 @@ Ext
 			});
 			map.addLayers([ googlePhysical ]);
 
+			// Patch to make OpenLayers' Pans and Zooms work with Selenium
+			OpenLayers.Handler.Click.prototype.mousedown = function(evt) {
+		    if(evt.xy && (evt.xy.x <= 0.0 && evt.xy.y <= 0.0)) {
+		        return true;
+		    }
+		    this.down = this.getEventInfo(evt);
+		    this.last = this.getEventInfo(evt);
+		    return true;
+		};
+		
 			// australia bbox
 			var zoomToBounds = new OpenLayers.Bounds(108.0, -45.0, 155.0, -10.0)
 					.transform(new OpenLayers.Projection("EPSG:4326"), map
