@@ -8,15 +8,24 @@
  * Reads settings
  */
 var Properties = require("node-properties");
-var propStore = (new Properties()).load("./src/app.properties",
-		function(err) {
-			if (err != null) {
-				console.log(err);
-				return;
-			}
 
-			startServer(this);
-		});
+var propStore = (new Properties()).load("./src/app.properties", function(err) {
+	if (err != null) {
+		console.log(err);
+		return;
+	}
+
+	var env = (typeof process.argv[2] === "undefined") ? "lan" : process.argv[2];
+	this.getProperty = function get(propName) {
+		if (typeof this.get(propName) === "undefined") {
+			return this.get(propName + "." + env);
+		} else {
+			return this.get(propName);
+		}
+	};
+
+	startServer(this);
+});
 
 /*
  * Starts server
@@ -57,35 +66,23 @@ function startServer(props) {
 	/*
 	 * Home page mounted on /index.html
 	 */
-	app
-			.get(
-					'/index.html',
-					function(req, res) {
-						res.render("index.html", {
-							props : props,
-							layout : "layout.html"
-						});
-						
-					}
-				);
+	app.get('/index.html', function(req, res) {
+		res.render("index.html", {
+			props : props,
+			layout : "layout.html"
+		});
+
+	});
 
 	/*
-	 * Database query mounted on /geojson
+	 * PostGIS query 
 	 */
 	app
 			.get(
-					'/geojson',
+					"/pg",
 					function(req, res) {
 
 						function resSend(jsonOutput) {
-							// Allowing x-domain request
-							res.header("Access-Control-Allow-Origin", "*");
-							res.header("Access-Control-Allow-Credentials", "true");
-							res.header("Access-Control-Allow-Methods", "OPTIONS, GET, POST");
-							res
-									.header(
-											"Access-Control-Allow-Headers",
-											"Content-Type, Depth, User-Agent, X-File-Size, X-Requested-With, If-Modified-Since, X-File-Name, Cache-Control");
 
 							if (callback) {
 								if (typeof jsonOutput == 'string') {
@@ -105,48 +102,16 @@ function startServer(props) {
 							}
 						}
 
-						console.log("Request: " + req); // XXX
-						var host = req.param("host", props.get("host"));
-						var db = req.param("db", props.get("db.name"));
-						var port = req.param("port", props.get("db.port"));
-
-						var user = req.param("user", props.get("db.user"));
-						var password = req.param("password", props.get("db.password"));
-
-						var table = req.param("table", "lga11aaustgen005");
-						var featureKey = req.param("key", "lga_code11");
-						var featureGeom = req.param("geom", "wkb_geometry");
-						var callback = req.param("callback", null);
-
-						var bbox = req.param("bbox", null);
-						var zoom = req.param("zoom", null);
-						var epsg = req.param("epsg", null);
-
-						// special callback for OpenLayers
-						var formatOptions = req.param("format_options", null);
-						if (formatOptions) {
-							callback = formatOptions.substr(formatOptions.indexOf(':') + 1)
-						}
+						setHeaders(res);
 
 						var config = {
-							user : user,
-							password : password,
-							host : host,
-							database : db,
-							port : port
+							user : $("pg.user"),
+							password : $("pg.password"),
+							host : $("pg.host"),
+							database : $("pg.db"),
+							port : $("pg.port")
 						};
 
-/*
-						
-						var whereClause = 'TRUE';
-						if (bbox && bbox.length > 0) { // filtering by bbox
-							var coordinates = bbox.split(",");
-							whereClause = sprintf(
-									"ST_Intersects(%s,ST_Envelope(ST_GeomFromText('LINESTRING(%s %s, %s %s)',4283)))",
-									featureGeom, coordinates[0], coordinates[1], coordinates[2],
-									coordinates[3]);
-						}
-*/
 						pg
 								.connect(
 										config,
@@ -156,11 +121,19 @@ function startServer(props) {
 												return;
 											}
 
-											var sqlCommand = sprintf(
-													"select * from Getfeature('lga11', '%s', %s, %s) AS (code INTEGER, geometry TEXT)",
-													bbox, zoom, epsg);
+											var cor = req.param("bbox", null).split(",");
+											var poly = sprintf(
+													"POLYGON ((%s %s, %s %s, %s %s, %s %s, %s %s))",
+													cor[1], cor[0], cor[3], cor[0], cor[3], cor[2],
+													cor[1], cor[2], cor[1], cor[0]);
 
-											console.log("pg.connect: " + sqlCommand);
+											var sqlCommand = sprintf(
+													"SELECT ST_AsGeoJSON(%s) AS geometry "
+															+ "FROM %s WHERE ST_Intersects(%s, ST_Envelope(ST_GeomFromText('%s', %s)))",
+													$("pg.geom"), req.param("table", null), $("pg.geom"),
+													poly, $("epsg"));
+
+											console.log("XXX sqlCommand: " + sqlCommand);
 											var query = client
 													.query(
 															sqlCommand,
@@ -178,19 +151,11 @@ function startServer(props) {
 																var jsonOutput = '{"type": "FeatureCollection", "crs":{"type":"name","properties":{"name":"EPSG:4283"}}, "features": [';
 																for ( var i = 0; i < result.rows.length; i++) {
 																	var iFeatureKey = result.rows[i].code;
-																	var iFeature = '{"type": "Feature", "properties":' +
-																	      '{"FeatureCode": "' + iFeatureKey + '"}';
+																	var iFeature = '{"type": "Feature", "properties":'
+																			+ '{"FeatureCode": "'
+																			+ iFeatureKey
+																			+ '"}';
 																	var geomJson = result.rows[i].geometry; // this
-																																							// is
-																																							// returned
-																																							// as
-																																							// non-parsed
-																																							// JSON
-																																							// text,
-																																							// keep
-																																							// it
-																																							// that
-																																							// way
 																	iFeature += ', "geometry": ' + geomJson;
 																	iFeature += ' }';
 																	jsonOutput += iFeature;
@@ -208,4 +173,17 @@ function startServer(props) {
 	app.listen(2000);
 	console.log("Express server listening on port %d in %s mode",
 			app.address().port, app.settings.env);
+
+	/**
+	 * Sets stanrd headers
+	 */
+	setHeaders = function(res) {
+		res.header("Content-Type", "application/json");
+		res.header("Cache-Control", "no-cache");
+	}
+
+	$ = function(propName) {
+		return props.getProperty(propName);
+	}
+
 }

@@ -187,7 +187,7 @@ function buildRequestUrl(type, data) {
 		return "https://dev-api.aurin.org.au/node/geoinfo/feature/" + data + "/2006";
 	}
 	if (type === "newGeoInfoFull") {
-		return "https://dev-api.aurin.org.au/node/feature/" + data + "/2006";
+		return "https://dev-api.aurin.org.au/geoinfo/feature/" + data + "/2006";
 	}
 
 	
