@@ -3,7 +3,6 @@ var start, end;
 var ngeoms = 0;
 var npoints = 0;
 var responseSize = 0;
-var firstResponse = true;
 var vecLayer = null;
 var main;
 
@@ -40,67 +39,10 @@ Ext.require([ "Ext.direct.*", "Ext.panel.Panel", "Ext.form.field.Text",
 Ext
 		.onReady(function() {
 
-			// TODO: add compression (or lack thereof) in the headers
 			var onComboChange = function() {
 				if (vecLayer) {
 					map.removeLayer(vecLayer);
 					vecLayer = null;
-				}
-
-				if (Ext.getCmp("requestData").getValue() !== "no") {
-					firstResponse = true;
-					vecLayer = new OpenLayers.Layer.Vector("GeoJSON", {
-						projection : new OpenLayers.Projection("EPSG:4326"),
-						strategies : [ new OpenLayers.Strategy.BBOX() ],
-						protocol : new OpenLayers.Protocol.HTTP({
-							format : new OpenLayers.Format.GeoJSON(),
-							url : buildRequestUrl(Ext.getCmp("requestType").getValue(), Ext
-									.getCmp("requestData").getValue(), Ext.getCmp("requestGen")
-									.getValue()),
-							params : {
-								includegeom : "true",
-								zoom : map.zoom,
-								epsg : map.displayProjection.projCode.split(":")[1]
-							}
-						}),
-						eventListeners : {
-							"loadstart" : function() {
-								start = new Date();
-								ngeoms = 0;
-								npoints = 0;
-							},
-							"loadend" : function(evt) {
-								if (firstResponse) {
-									firstResponse = false;
-								} else {
-									end = new Date();
-									var seconds = (end - start) / 1000;
-									var throughput = Math.round(npoints / seconds, 0);
-									log({
-										requesttype : '"' + Ext.getCmp("requestType").getValue()
-												+ '"',
-										requestdata : '"' + Ext.getCmp("requestData").getValue()
-												+ '"',
-										generalization : '"' + Ext.getCmp("requestGen").getValue()
-												+ '"',
-										compression : '"' + Ext.getCmp("requestComp").getValue()
-												+ '"',
-										size : responseSize,
-										points : npoints,
-										geoms : ngeoms,
-										elapsed : seconds,
-										throughput : throughput
-									});
-								}
-							},
-							"featureadded" : function(elem) {
-								ngeoms++;
-								npoints += elem.feature.geometry.getVertices().length;
-							}
-						}
-					});
-
-					map.addLayers([ vecLayer ]);
 				}
 			};
 
@@ -130,16 +72,33 @@ Ext
 														labelWidth : 100,
 														flex : 1,
 														store : new Ext.data.SimpleStore({
-															data : [ [ "oldGeoInfo", "PostGIS" ],
-																	[ "newGeoInfoFull", "CouchDB full prec." ],
-																	[ "newGeoInfoRed", "CouchDB red. prec." ] ],
+															data : [ [ "pg", "PostGIS" ],
+																	[ "couchdb", "CouchDB" ] ],
 															fields : [ "value", "text" ]
 														}),
 														valueField : "value",
 														displayField : "text",
 														triggerAction : "all",
 														editable : false,
-														value : "oldGeoInfo",
+														value : "pg",
+														onChange : onComboChange
+													},
+													{
+														xtype : "combo",
+														id : "precision",
+														fieldLabel : "Precision",
+														labelWidth : 100,
+														flex : 1,
+														store : new Ext.data.SimpleStore({
+															data : [ [ 15, "Full prec." ],
+																	[ 4, "Red. prec." ] ],
+															fields : [ "value", "text" ]
+														}),
+														valueField : "value",
+														displayField : "text",
+														triggerAction : "all",
+														editable : false,
+														value : 15,
 														onChange : onComboChange
 													},
 													{
@@ -219,11 +178,12 @@ Ext
 											bodyStyle : {
 												padding : "10px"
 											},
-											tpl : '<p>{requesttype},{requestdata},{generalization},{compression},{size},{points},{geoms},{elapsed},{throughput}</p>',
+											tpl : '<p>{requesttype},{precision},{requestdata},{generalization},{compression},{size},{points},{geoms},{elapsed},{throughput}</p>',
 											tplWriteMode : "append",
 											autoScroll : true,
 											data : {
 												requesttype : "Type",
+												precision : "Precision",
 												requestdata : "Dataset",
 												generalization : "Generalization",
 												compression : "Compression",
@@ -265,11 +225,16 @@ Ext
 				}
 			});
 
-			/*
-			map.events.register("movestart", map, function(map) {
-				refresh();
+			// Re-creates and re-load a vector layer at every map movement 
+			map.events.register("movestart", map, function(map2) {
+				if (Ext.getCmp("requestData").getValue() !== "no") {
+					if (vecLayer !== null) {
+						map.removeLayer(vecLayer);
+					}
+					vecLayer = createVecLayer();
+					map.addLayers([ vecLayer ]);
+				}
 			});
-			*/
 		});
 
 function log(args) {
@@ -282,7 +247,7 @@ function log(args) {
 
 function buildRequestUrl(type, data, gen) {
 	// TODO: add COuchDB things, add fixed zoom level if the user selected that
-	if (type === "oldGeoInfo") {
+	if (type === "pg") {
 		var table = pgTables[data].ungeneralized;
 		if (gen !== 0) {
 			table = pgTables[data].generalized
@@ -296,25 +261,57 @@ function buildRequestUrl(type, data, gen) {
 
 }
 
-function refresh() {
-
-	var myStyles = new OpenLayers.StyleMap({
-		"default" : new OpenLayers.Style({
-			fillColor : "red",
-			strokeColor : "black",
-			strokeWidth : 3
-		})
-	});
-
-	// TODO: add compression (or lack thereof) in the headers
-
-	if (Ext.getCmp("requestData").getValue() === "no") {
-		if (vecLayer) {
-			map.removeLayer(vecLayer);
-			vecLayer = null;
+function createVecLayer() {
+	/*
+		var myStyles = new OpenLayers.StyleMap({
+			"default" : new OpenLayers.Style({
+				fillColor : "red",
+				strokeColor : "black",
+				strokeWidth : 3
+			})
+		});
+	*/
+	return new OpenLayers.Layer.Vector("GeoJSON", {
+		projection : new OpenLayers.Projection("EPSG:4326"),
+		strategies : [ new OpenLayers.Strategy.BBOX() ],
+		protocol : new OpenLayers.Protocol.HTTP({
+			format : new OpenLayers.Format.GeoJSON(),
+			url : buildRequestUrl(Ext.getCmp("requestType").getValue(), Ext.getCmp(
+					"requestData").getValue(), Ext.getCmp("requestGen").getValue()),
+			params : {
+				includegeom : "true",
+				zoom : map.zoom,
+				precision : Ext.getCmp("precision").getValue(),
+				epsg : map.displayProjection.projCode.split(":")[1]
+			}
+		}),
+		eventListeners : {
+			"loadstart" : function() {
+				start = new Date();
+				ngeoms = 0;
+				npoints = 0;
+			},
+			"loadend" : function(evt) {
+				end = new Date();
+				var seconds = (end - start) / 1000;
+				var throughput = Math.round(npoints / seconds, 0);
+				log({
+					requesttype : '"' + Ext.getCmp("requestType").getValue() + '"',
+					precision :  Ext.getCmp("precision").getValue(),
+					requestdata : '"' + Ext.getCmp("requestData").getValue() + '"',
+					generalization : '"' + Ext.getCmp("requestGen").getValue() + '"',
+					compression : '"' + Ext.getCmp("requestComp").getValue() + '"',
+					size : responseSize,
+					points : npoints,
+					geoms : ngeoms,
+					elapsed : seconds,
+					throughput : throughput
+				});
+			},
+			"featureadded" : function(elem) {
+				ngeoms++;
+				npoints += elem.feature.geometry.getVertices().length;
+			}
 		}
-	} else {
-	}
-
-	return false;
+	});
 };

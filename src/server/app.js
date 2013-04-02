@@ -82,7 +82,6 @@ function startServer(props) {
 					/\/pg\/(.+)/,
 					function(req, res) {
 
-						console.log("XXX req.params[0] " + req.params[0]);
 						setHeaders(res);
 
 						var config = {
@@ -109,9 +108,9 @@ function startServer(props) {
 													cor[2], cor[1], cor[0], cor[1]);
 
 											var sqlCommand = sprintf(
-													"SELECT ST_AsGeoJSON(%s, 4) AS geometry, ogc_fid "
+													"SELECT ST_AsGeoJSON(%s, %s) AS geometry, ogc_fid "
 															+ "FROM %s WHERE ST_Intersects(%s, ST_Envelope(ST_GeomFromText('%s', %s)))",
-													$("pg.geom"), req.params[0], $("pg.geom"), poly,
+													$("pg.geom"), req.param("precision", "full"), req.params[0], $("pg.geom"), poly,
 													$("epsg"));
 
 											console.log("XXX sqlCommand: " + sqlCommand);
@@ -145,7 +144,6 @@ function startServer(props) {
 																	}
 																}
 																jsonOutput += ']}';
-																console.log("XXX " + jsonOutput);
 																res.send(jsonOutput);
 															});
 										});
