@@ -79,29 +79,10 @@ function startServer(props) {
 	 */
 	app
 			.get(
-					"/pg",
+					/\/pg\/(.+)/,
 					function(req, res) {
 
-						function resSend(jsonOutput) {
-
-							if (callback) {
-								if (typeof jsonOutput == 'string') {
-									res.send(callback + "(" + jsonOutput + ");", {
-										'Content-Type' : 'text/javascript'
-									});
-								} else {
-									res.send(callback + "(" + JSON.stringify(jsonOutput) + ");",
-											{
-												'Content-Type' : 'text/javascript'
-											});
-								}
-							} else {
-								res.send(jsonOutput, {
-									'Content-Type' : 'application/json'
-								});
-							}
-						}
-
+						console.log("XXX req.params[0] " + req.params[0]);
 						setHeaders(res);
 
 						var config = {
@@ -124,16 +105,17 @@ function startServer(props) {
 											var cor = req.param("bbox", null).split(",");
 											var poly = sprintf(
 													"POLYGON ((%s %s, %s %s, %s %s, %s %s, %s %s))",
-													cor[1], cor[0], cor[3], cor[0], cor[3], cor[2],
-													cor[1], cor[2], cor[1], cor[0]);
+													cor[0], cor[1], cor[0], cor[3], cor[2], cor[3],
+													cor[2], cor[1], cor[0], cor[1]);
 
 											var sqlCommand = sprintf(
-													"SELECT ST_AsGeoJSON(%s) AS geometry "
+													"SELECT ST_AsGeoJSON(%s, 4) AS geometry, ogc_fid "
 															+ "FROM %s WHERE ST_Intersects(%s, ST_Envelope(ST_GeomFromText('%s', %s)))",
-													$("pg.geom"), req.param("table", null), $("pg.geom"),
-													poly, $("epsg"));
+													$("pg.geom"), req.params[0], $("pg.geom"), poly,
+													$("epsg"));
 
 											console.log("XXX sqlCommand: " + sqlCommand);
+
 											var query = client
 													.query(
 															sqlCommand,
@@ -143,19 +125,18 @@ function startServer(props) {
 																	return;
 																}
 																if (!result || !("rows" in result)) {
-																	resSend(callback, {
+																	resSend({
 																		"error" : "No result found"
 																	});
+																	console.log("ERROR: " + "No result found");
 																	return;
 																}
+																console.log("XXX n rows " + result.rows.length);
 																var jsonOutput = '{"type": "FeatureCollection", "crs":{"type":"name","properties":{"name":"EPSG:4283"}}, "features": [';
 																for ( var i = 0; i < result.rows.length; i++) {
-																	var iFeatureKey = result.rows[i].code;
 																	var iFeature = '{"type": "Feature", "properties":'
-																			+ '{"FeatureCode": "'
-																			+ iFeatureKey
-																			+ '"}';
-																	var geomJson = result.rows[i].geometry; // this
+																			+ '{"FeatureCode": "' + result.rows[i].ogc_fid + '"}';
+																	var geomJson = result.rows[i].geometry;
 																	iFeature += ', "geometry": ' + geomJson;
 																	iFeature += ' }';
 																	jsonOutput += iFeature;
@@ -164,7 +145,8 @@ function startServer(props) {
 																	}
 																}
 																jsonOutput += ']}';
-																resSend(jsonOutput);
+																console.log("XXX " + jsonOutput);
+																res.send(jsonOutput);
 															});
 										});
 

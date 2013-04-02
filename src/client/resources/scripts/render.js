@@ -5,6 +5,33 @@ var npoints = 0;
 var wfslayer = null;
 var main;
 
+var pgTables = {
+	"cd" : {
+		"ungeneralized" : "abs_asgc.ste06aaust",
+		"generalized" : "abs_asgc.ste06gen"
+	},
+	"lga" : {
+		"ungeneralized" : "abs_asgc.lga06aaust",
+		"generalized" : "abs_asgc.lga06gen"
+	},
+	"pbc" : {
+		"ungeneralized" : "public.pbc10aaust",
+		"generalized" : "public.pbc10gen"
+	},
+	"sd" : {
+		"ungeneralized" : "abs_asgc.sd06aaust",
+		"generalized" : "abs_asgc.sd06gen"
+	},
+	"sla" : {
+		"ungeneralized" : "abs_asgc.sla06aaust",
+		"generalized" : "abs_asgc.sla06gen"
+	},
+	"ste" : {
+		"ungeneralized" : "abs_asgc.ste06aaust",
+		"generalized" : "abs_asgc.ste06gen"
+	}
+};
+
 Ext.require([ "Ext.direct.*", "Ext.panel.Panel", "Ext.form.field.Text",
 		"Ext.toolbar.TextItem" ]);
 
@@ -55,15 +82,16 @@ Ext
 														labelWidth : 100,
 														flex : 1,
 														store : new Ext.data.SimpleStore({
-															data : [ [ "state", "STE" ], [ "ccd", "PBC" ],
-																	[ "sla", "SLA" ] ],
+															data : [ [ "ste", "STE" ], [ "lga", "LGA" ],
+																	[ "pbc", "PBC" ], [ "sd", "SD" ],
+																	[ "sla", "SLA" ], [ "cd", "CD" ] ],
 															fields : [ "value", "text" ]
 														}),
 														valueField : "value",
 														displayField : "text",
 														triggerAction : "all",
 														editable : false,
-														value : "state"
+														value : "ste"
 													},
 													{
 														xtype : "combo",
@@ -83,16 +111,16 @@ Ext
 													},
 													{
 														xtype : "combo",
-														id : "requestZoom",
-														fieldLabel : "Zoom",
+														id : "requestGen",
+														fieldLabel : "Gen.level",
 														labelWidth : 100,
 														flex : 1,
 														store : new Ext.data.SimpleStore({
-															data : [ [ 0, "Auto" ], [ 5, "5" ], [ 6, "6" ],
-																	[ 7, "7" ], [ 8, "8" ], [ 9, "9" ],
-																	[ 10, "10" ], [ 11, "11" ], [ 12, "12" ],
-																	[ 13, "13" ], [ 14, "14" ], [ 15, "15" ],
-																	[ 16, "16" ], [ 17, "17" ] ],
+															data : [ [ 0, "Ungeneralized" ],
+																	[ 0.001, "0.001 degree" ],
+																	[ 0.005, "0.005 degree" ],
+																	[ 0.01, "0.01 degree" ],
+																	[ 0.05, "0.05 degree" ], ],
 															fields : [ "value", "text" ]
 														}),
 														valueField : "value",
@@ -151,17 +179,7 @@ Ext
 			});
 			map.addLayers([ googlePhysical ]);
 
-			// Patch to make OpenLayers' Pans and Zooms work with Selenium
-			OpenLayers.Handler.Click.prototype.mousedown = function(evt) {
-		    if(evt.xy && (evt.xy.x <= 0.0 && evt.xy.y <= 0.0)) {
-		        return true;
-		    }
-		    this.down = this.getEventInfo(evt);
-		    this.last = this.getEventInfo(evt);
-		    return true;
-		};
-		
-			// australia bbox
+			// Australia's bbox
 			var zoomToBounds = new OpenLayers.Bounds(108.0, -45.0, 155.0, -10.0)
 					.transform(new OpenLayers.Projection("EPSG:4326"), map
 							.getProjectionObject());
@@ -181,16 +199,20 @@ function log(args) {
 	}, true);
 }
 
-function buildRequestUrl(type, data) {
+function buildRequestUrl(type, data, gen) {
 	// TODO: add COuchDB things, add fixed zoom level if the user selected that
 	if (type === "oldGeoInfo") {
-		return "https://dev-api.aurin.org.au/node/geoinfo/feature/" + data + "/2006";
+		var table = pgTables[data].ungeneralized;
+		if (gen !== 0) {
+			table = pgTables[data].generalized
+					+ String(gen).replace(".", "_").replace(" ", "");
+		}
+		return "http://localhost:2000/pg/" + table;
 	}
 	if (type === "newGeoInfoFull") {
 		return "https://dev-api.aurin.org.au/geoinfo/feature/" + data + "/2006";
 	}
 
-	
 }
 
 function refresh() {
@@ -215,7 +237,7 @@ function refresh() {
 		strategies : [ new OpenLayers.Strategy.BBOX() ],
 		protocol : new OpenLayers.Protocol.Script({
 			url : buildRequestUrl(Ext.getCmp("requestType").getValue(), Ext.getCmp(
-					"requestData").getValue()),
+					"requestData").getValue(), Ext.getCmp("requestGen").getValue()),
 			callbackKey : "format_options", // must be set to this
 			callbackPrefix : "callback:",
 			params : {
