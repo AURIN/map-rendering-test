@@ -132,7 +132,7 @@ function startServer(props) {
 																	return;
 																}
 																console.log("XXX n rows " + result.rows.length);
-																var jsonOutput = '{"type": "FeatureCollection", "crs":{"type":"name","properties":{"name":"EPSG:4283"}}, "features": [';
+																var jsonOutput = '{"type": "FeatureCollection", "crs":{"type":"name","properties":{"name":"EPSG:4326"}}, "features": [';
 																for ( var i = 0; i < result.rows.length; i++) {
 																	var iFeature = '{"type": "Feature", "properties":'
 																			+ '{"FeatureCode": "' + result.rows[i].ogc_fid + '"}';
