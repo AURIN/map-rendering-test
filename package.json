@@ -3,11 +3,11 @@
   , "private": true
   , "dependencies": {
       "express": "2.5.0"
-    , "jqtpl": ">= 0.0.1"
+    , "jqtpl": "1.1.0"
     , "buffered-reader": "*"
     , "buffered-writer": "*"
     , "sprintf": "*"
     , "pg": "*"
-    , "node-properties": "*"
+    , "properties": "0.2.0"
   }
 }

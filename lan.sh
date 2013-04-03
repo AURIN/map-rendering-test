@@ -1,1 +1,1 @@
-node src/server/app.js lan
+node ./app.js lan
