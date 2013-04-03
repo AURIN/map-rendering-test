@@ -253,7 +253,7 @@ function buildRequestUrl(type, data, gen) {
 			table = pgTables[data].generalized
 					+ String(gen).replace(".", "_").replace(" ", "");
 		}
-		return "http://localhost:2000/pg/" + table;
+		return "pg/" + table;
 	}
 	if (type === "newGeoInfoFull") {
 		return "https://dev-api.aurin.org.au/geoinfo/feature/" + data + "/2006";

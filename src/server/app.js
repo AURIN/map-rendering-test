@@ -67,6 +67,7 @@ function startServer(props) {
 	 * Home page mounted on /index.html
 	 */
 	app.get('/index.html', function(req, res) {
+		res.header("Access-Control-Allow-Origin", "*");
 		res.render("index.html", {
 			props : props,
 			layout : "layout.html"
@@ -150,7 +151,7 @@ function startServer(props) {
 
 					});
 
-	app.listen(2000);
+	app.listen($("port")));
 	console.log("Express server listening on port %d in %s mode",
 			app.address().port, app.settings.env);
 
