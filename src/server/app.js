@@ -32,6 +32,10 @@ var propStore = (new Properties()).load("./src/app.properties", function(err) {
  */
 function startServer(props) {
 
+	$ = function(propName) {
+		return props.getProperty(propName);
+	}
+
 	/*
 	 * Loads stuff
 	 */
@@ -151,7 +155,7 @@ function startServer(props) {
 
 					});
 
-	app.listen($("port")));
+	app.listen($("port"));
 	console.log("Express server listening on port %d in %s mode",
 			app.address().port, app.settings.env);
 
@@ -161,10 +165,6 @@ function startServer(props) {
 	setHeaders = function(res) {
 		res.header("Content-Type", "application/json");
 		res.header("Cache-Control", "no-cache");
-	}
-
-	$ = function(propName) {
-		return props.getProperty(propName);
 	}
 
 }

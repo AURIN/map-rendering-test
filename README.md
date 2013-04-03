@@ -3,20 +3,15 @@ map-rendering-test
 
 Test-bed to run rendering performance tests.
 
+## Installation
 
-## Client
+on LINUX, run: ./lan.sh
 
-OpenLayers
+on Windows, run: cmd /c lan.bat
 
+If you are outside the AURIN's LAN:
+1) Setup an SSH tunnel from port localhost:8984 to port db2.aurin.org.au:5984
+2) Setup an SSH tunnel from port localhost:8432 to port db2.aurin.org.au:5432
+3) Run ./wan.sh
 
-## Server
-
-### Node.js Modules Dependencies
-
-buffered-reader
-buffered-writer
-pg
-express
-sprintf
-properties
-jqtpl
+   

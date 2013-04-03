@@ -1,0 +1,13 @@
+{  "name": "map-rendering-test"
+  , "version": "1.0.0-SNAPSHOT"
+  , "private": true
+  , "dependencies": {
+      "express": "2.5.0"
+    , "jqtpl": ">= 0.0.1"
+    , "buffered-reader": "*"
+    , "buffered-writer": "*"
+    , "sprintf": "*"
+    , "pg": "*"
+    , "node-properties": "*"
+  }
+}
