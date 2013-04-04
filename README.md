@@ -5,7 +5,16 @@ Test-bed to run rendering performance tests.
 
 ## Installation
 
-`npm install`
+If on dev-api.aurin.org.au, change dir to `/opt`.
+
+Install the package:
+`npm install git+https://<your github user>@github.com/AURIN/map-rendering-test.git#<version>"`
+
+Move the package's from the `node_modules` dir
+`mv node_modules/map-rendering-test/ .`
+
+If on dev-api.aurin.org.au:
+`sudo service rendering restart`
 
 
 ## Run
@@ -20,6 +29,8 @@ If you are outside the AURIN's LAN:
 3) Run `./wan.sh`
 
 Open a browser (possibly FireFox) at:
-http://localhost:2010/index.html
+`http://localhost:2010/index.html`
 
+If it has been installed on dev-api.aurin.org.au, open at:
+`https://dev-api.aurin.org.au/rendering/index.html`
    

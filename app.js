@@ -4,6 +4,8 @@
  * Server part of map-rendering-test application
  */
 
+var zlib = require('zlib');
+
 /*
  * Reads settings
  */
@@ -14,7 +16,7 @@ require("properties").load("./app.properties", function(err, p) {
 	}
 
 	var env = (typeof process.argv[2] === "undefined") ? "lan" : process.argv[2];
-	p.getProperty = function (propName) {
+	p.getProperty = function(propName) {
 		if (typeof p[propName] === "undefined") {
 			return p[propName + "." + env];
 		} else {
@@ -68,14 +70,21 @@ function startServer(props) {
 	/*
 	 * Home page mounted on /index.html
 	 */
-	app.get('/index.html', function(req, res) {
-		res.header("Access-Control-Allow-Origin", "*");
-		res.render("index.html", {
-			props : props,
-			layout : "layout.html"
-		});
+	app
+			.get(
+					'/index.html',
+					function(req, res) {
+						res
+								.header(
+										"Content-Security-Policy",
+										"script-src https://maps.google.com https://apps.aurin.org.au; style-src https://apps.aurin.org.au");
 
-	});
+						res.render("index.html", {
+							props : props,
+							layout : "layout.html"
+						});
+
+					});
 
 	/*
 	 * PostGIS query 
@@ -84,8 +93,6 @@ function startServer(props) {
 			.get(
 					/\/pg\/(.+)/,
 					function(req, res) {
-
-						setHeaders(res);
 
 						var config = {
 							user : $("pg.user"),
@@ -113,10 +120,10 @@ function startServer(props) {
 											var sqlCommand = sprintf(
 													"SELECT ST_AsGeoJSON(%s, %s) AS geometry, ogc_fid "
 															+ "FROM %s WHERE ST_Intersects(%s, ST_Envelope(ST_GeomFromText('%s', %s)))",
-													$("pg.geom"), req.param("precision", "full"), req.params[0], $("pg.geom"), poly,
-													$("epsg"));
+													$("pg.geom"), req.param("precision", "full"),
+													req.params[0], $("pg.geom"), poly, $("epsg"));
 
-											console.log("XXX sqlCommand: " + sqlCommand);
+											console.log("-- sqlCommand: " + sqlCommand);
 
 											var query = client
 													.query(
@@ -133,11 +140,12 @@ function startServer(props) {
 																	console.log("ERROR: " + "No result found");
 																	return;
 																}
-																console.log("XXX n rows " + result.rows.length);
+																console.log("-- N rows " + result.rows.length);
 																var jsonOutput = '{"type": "FeatureCollection", "crs":{"type":"name","properties":{"name":"EPSG:4326"}}, "features": [';
 																for ( var i = 0; i < result.rows.length; i++) {
 																	var iFeature = '{"type": "Feature", "properties":'
-																			+ '{"FeatureCode": "' + result.rows[i].ogc_fid + '"}';
+																			+ '{"FeatureCode": "'
+																			+ result.rows[i].ogc_fid + '"}';
 																	var geomJson = result.rows[i].geometry;
 																	iFeature += ', "geometry": ' + geomJson;
 																	iFeature += ' }';
@@ -147,7 +155,7 @@ function startServer(props) {
 																	}
 																}
 																jsonOutput += ']}';
-																res.send(jsonOutput);
+																sendData(req, res, jsonOutput);
 															});
 										});
 
@@ -158,11 +166,23 @@ function startServer(props) {
 			app.address().port, app.settings.env);
 
 	/**
-	 * Sets stanrd headers
+	 * Sends data out
 	 */
-	setHeaders = function(res) {
+	sendData = function(req, res, data) {
 		res.header("Content-Type", "application/json");
 		res.header("Cache-Control", "no-cache");
+		if (req.param("compression", "false") === "true") {
+			res.header("Content-Encoding", "gzip");
+			zlib.gzip(data, function(err, zippedData) {
+				if (err) {
+					res.headers.statusCode = 500;
+					res.send("ERRROR");
+				} else {
+					res.send(zippedData);
+				}
+			});
+		} else {
+			res.send(data);
+		}
 	}
-
 }

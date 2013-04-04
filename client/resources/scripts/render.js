@@ -145,7 +145,7 @@ Ext
 														labelWidth : 100,
 														flex : 1,
 														store : new Ext.data.SimpleStore({
-															data : [ [ 0, "Ungeneralized" ],
+															data : [ [ "no", "Ungeneralized" ],
 																	[ 0.001, "0.001 degree" ],
 																	[ 0.005, "0.005 degree" ],
 																	[ 0.01, "0.01 degree" ],
@@ -156,7 +156,7 @@ Ext
 														displayField : "text",
 														triggerAction : "all",
 														editable : false,
-														value : 0,
+														value : 0.05,
 														onChange : onComboChange
 													} ]
 										},
@@ -238,18 +238,20 @@ Ext
 		});
 
 function log(args) {
-	Ext.getCmp("logger").update(args);
-	Ext.getCmp("logger").scrollBy({
-		x : 0,
-		y : 16
-	}, true);
+	if (args.size > 0) {
+		Ext.getCmp("logger").update(args);
+		Ext.getCmp("logger").scrollBy({
+			x : 0,
+			y : 16
+		}, true);
+	}
 }
 
 function buildRequestUrl(type, data, gen) {
 	// TODO: add COuchDB things, add fixed zoom level if the user selected that
 	if (type === "pg") {
 		var table = pgTables[data].ungeneralized;
-		if (gen !== 0) {
+		if (gen !== "no") {
 			table = pgTables[data].generalized
 					+ String(gen).replace(".", "_").replace(" ", "");
 		}
@@ -262,15 +264,7 @@ function buildRequestUrl(type, data, gen) {
 }
 
 function createVecLayer() {
-	/*
-		var myStyles = new OpenLayers.StyleMap({
-			"default" : new OpenLayers.Style({
-				fillColor : "red",
-				strokeColor : "black",
-				strokeWidth : 3
-			})
-		});
-	*/
+
 	return new OpenLayers.Layer.Vector("GeoJSON", {
 		projection : new OpenLayers.Projection("EPSG:4326"),
 		strategies : [ new OpenLayers.Strategy.BBOX() ],
@@ -281,6 +275,7 @@ function createVecLayer() {
 			params : {
 				includegeom : "true",
 				zoom : map.zoom,
+				compression : Ext.getCmp("requestComp").getValue(),
 				precision : Ext.getCmp("precision").getValue(),
 				epsg : map.displayProjection.projCode.split(":")[1]
 			}
@@ -297,10 +292,10 @@ function createVecLayer() {
 				var throughput = Math.round(npoints / seconds, 0);
 				log({
 					requesttype : '"' + Ext.getCmp("requestType").getValue() + '"',
-					precision :  Ext.getCmp("precision").getValue(),
+					precision : Ext.getCmp("precision").getValue(),
 					requestdata : '"' + Ext.getCmp("requestData").getValue() + '"',
 					generalization : '"' + Ext.getCmp("requestGen").getValue() + '"',
-					compression : '"' + Ext.getCmp("requestComp").getValue() + '"',
+					compression :  + (Ext.getCmp("requestComp").getValue() === 1) ? true : false,
 					size : responseSize,
 					points : npoints,
 					geoms : ngeoms,
