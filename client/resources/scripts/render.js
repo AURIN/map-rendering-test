@@ -132,8 +132,8 @@ function buildRequestUrl(type, data, gen) {
 		}
 		return "pg/" + table;
 	}
-	if (type === "newGeoInfoFull") {
-		return "https://dev-api.aurin.org.au/geoinfo/feature/" + data + "/2006";
+	if (type === "couchdb") {
+		return "couchdb/";
 	}
 }
 
@@ -225,14 +225,16 @@ function createForm() {
 												xtype : "combo",
 												id : "requestData",
 												fieldLabel : "Data",
-												store : new Ext.data.SimpleStore(
-														{
-															data : [ [ "no", "No feature" ],
-																	[ "ste", "STE" ], [ "lga", "LGA" ],
-																	[ "pbc", "PBC" ], [ "sd", "SD" ],
-																	[ "sla", "SLA" ], [ "cd", "CD" ] ],
-															fields : [ "value", "text" ]
-														}),
+												store : new Ext.data.SimpleStore({
+													data : [ [ "no", "No feature" ], [ "pbc", "PBC" ] ],
+													/*																	
+																														data : [ [ "no", "No feature" ],
+																																			[ "ste", "STE" ], [ "lga", "LGA" ],
+																																			[ "pbc", "PBC" ], [ "sd", "SD" ],
+																																			[ "sla", "SLA" ], [ "cd", "CD" ] ],
+													*/
+													fields : [ "value", "text" ]
+												}),
 												valueField : "value",
 												displayField : "text",
 												triggerAction : "all",

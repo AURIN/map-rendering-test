@@ -87,6 +87,56 @@ function startServer(props) {
 					});
 
 	/*
+	 * CouchDB query
+	 */
+	app
+			.get(
+					/\/couchdb\/(.+)/,
+					function(req, res) {
+						var url = "http://db2.aurin.org.au:5984/geoinfo/_design/geoinfo/_spatial/_list/geojson/"
+						var a = "pbcExtent?bbox=140,-35,145,-30&featuretype=point&genlevel=0;";
+						
+/*
+/pbcExtent?bbox=140,-35,145,-30&featuretype=polygon&genlevel=0.05
+
+{
+    "type": "FeatureCollection",
+    "features": [
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "MultiPolygon",
+                "coordinates": [
+                    [
+                        [
+                            [
+                                145.254719392,
+                                -33.6503944665
+                            ],
+...
+                       [
+                                140.367452896,
+                                -34.757615859
+                            ]
+                        ]
+                    ]
+                ]
+            },
+            "properties": {
+                "poll_id": 6769,
+                "dataset": "pbc",
+                "ced": [
+                    "Barker"
+                ]
+            }
+        }
+    ]
+}
+  
+ */						
+					});
+
+	/*
 	 * PostGIS query 
 	 */
 	app
