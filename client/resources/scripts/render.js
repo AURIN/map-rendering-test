@@ -133,7 +133,7 @@ function buildRequestUrl(type, data, gen) {
 		return "pg/" + table;
 	}
 	if (type === "couchdb") {
-		return "couchdb/";
+		return "couchdb";
 	}
 }
 

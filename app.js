@@ -4,8 +4,6 @@
  * Server part of map-rendering-test application
  */
 
-var zlib = require('zlib');
-
 /*
  * Reads settings
  */
@@ -43,7 +41,13 @@ function startServer(props) {
 	var sprintf = require('sprintf').sprintf;
 	var pg = require('pg');
 	var jqtpl = require("jqtpl");
+	var zlib = require("zlib");
+	var nano;
+	var db;
 
+	/*
+	 * Starts server
+	 */
 	var app = module.exports = express.createServer();
 
 	// Configuration
@@ -54,6 +58,11 @@ function startServer(props) {
 		app.use(express.bodyParser());
 		app.use(express.methodOverride());
 		app.use(express.static("./client/resources"));
+
+		nano = require("nano")({
+			"url" : "http://" + $("couchdb.host") + ":" + $("couchdb.port")
+		});
+		db = nano.use($("couchdb.db"));
 	});
 
 	app.configure('development', function() {
@@ -91,49 +100,29 @@ function startServer(props) {
 	 */
 	app
 			.get(
-					/\/couchdb\/(.+)/,
+					/\/couchdb/,
 					function(req, res) {
-						var url = "http://db2.aurin.org.au:5984/geoinfo/_design/geoinfo/_spatial/_list/geojson/"
-						var a = "pbcExtent?bbox=140,-35,145,-30&featuretype=point&genlevel=0;";
-						
-/*
-/pbcExtent?bbox=140,-35,145,-30&featuretype=polygon&genlevel=0.05
-
-{
-    "type": "FeatureCollection",
-    "features": [
-        {
-            "type": "Feature",
-            "geometry": {
-                "type": "MultiPolygon",
-                "coordinates": [
-                    [
-                        [
-                            [
-                                145.254719392,
-                                -33.6503944665
-                            ],
-...
-                       [
-                                140.367452896,
-                                -34.757615859
-                            ]
-                        ]
-                    ]
-                ]
-            },
-            "properties": {
-                "poll_id": 6769,
-                "dataset": "pbc",
-                "ced": [
-                    "Barker"
-                ]
-            }
-        }
-    ]
-}
-  
- */						
+						console
+								.log("-- CouchDB request: /geoinfo/_design/geoinfo/_spatial/_list/geojson/pbcExtent?bbox="
+										+ req.param("bbox", "0,0,0,0")
+										+ "&featuretype="
+										+ req.param("featuretype", "polygon")
+										+ "&genlevel="
+										+ (String(req.param("genlevel", "0_05"))).replace("_", "."));
+						db.listview("geoinfo/_spatial", "geojson", "pbcExtent", {
+							bbox : req.param("bbox", "0,0,0,0"),
+							featuretype : req.param("featuretype", "polygon"),
+							genlevel : (String(req.param("genlevel", "0_05"))).replace("_",
+									".")
+						}, function(err, result) {
+							if (err) {
+								console.log("View datastore/datasets error: "
+										+ JSON.stringify(err.message));
+								res.end(err.message);
+							} else {
+								sendData(req, res, result);
+							}
+						});
 					});
 
 	/*
