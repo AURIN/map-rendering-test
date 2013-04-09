@@ -96,34 +96,30 @@ function startServer(props) {
 					});
 
 	/*
-	 * CouchDB query
+	 * CouchDB query 
 	 */
-	app
-			.get(
-					/\/couchdb/,
-					function(req, res) {
-						console
-								.log("-- CouchDB request: /geoinfo/_design/geoinfo/_spatial/_list/geojson/pbcExtent?bbox="
-										+ req.param("bbox", "0,0,0,0")
-										+ "&featuretype="
-										+ req.param("featuretype", "polygon")
-										+ "&genlevel="
-										+ (String(req.param("genlevel", "0_05"))).replace("_", "."));
-						db.listview("geoinfo/_spatial", "geojson", "pbcExtent", {
-							bbox : req.param("bbox", "0,0,0,0"),
-							featuretype : req.param("featuretype", "polygon"),
-							genlevel : (String(req.param("genlevel", "0_05"))).replace("_",
-									".")
-						}, function(err, result) {
-							if (err) {
-								console.log("View datastore/datasets error: "
-										+ JSON.stringify(err.message));
-								res.end(err.message);
-							} else {
-								sendData(req, res, result);
-							}
-						});
-					});
+	app.get(/\/couchdb(.+)/, function(req, res) {
+
+		var view = (req.params[0] === "exact") ? "pbcPolygon" : "pbcExtent";
+		console.log("-- CouchDB request: /" + $("couchdb.db")
+				+ "/_design/geoinfo/_spatial/_list/geojson/" + view + "?bbox="
+				+ req.param("bbox", "0,0,0,0") + "&featuretype="
+				+ req.param("featuretype", "polygon") + "&genlevel="
+				+ (String(req.param("genlevel", "0_05"))).replace("_", "."));
+		db.listview("geoinfo/_spatial", "geojson", view, {
+			bbox : req.param("bbox", "0,0,0,0"),
+			featuretype : req.param("featuretype", "polygon"),
+			genlevel : req.param("genlevel", "0.05")
+		}, function(err, result) {
+			if (err) {
+				console.log("View datastore/datasets error: "
+						+ JSON.stringify(err.message));
+				res.end(err.message);
+			} else {
+				sendData(req, res, result);
+			}
+		});
+	});
 
 	/*
 	 * PostGIS query 
@@ -159,7 +155,7 @@ function startServer(props) {
 											var sqlCommand = sprintf(
 													"SELECT ST_AsGeoJSON(%s, %s) AS geometry, ogc_fid "
 															+ "FROM %s WHERE ST_Intersects(%s, ST_Envelope(ST_GeomFromText('%s', %s)))",
-													$("pg.geom"), req.param("precision", "full"),
+													$("pg.geom"), req.param("precision", "15"),
 													req.params[0], $("pg.geom"), poly, $("epsg"));
 
 											console.log("-- sqlCommand: " + sqlCommand);
@@ -214,7 +210,7 @@ function startServer(props) {
 			res.header("Content-Encoding", "gzip");
 			zlib.gzip(data, function(err, zippedData) {
 				if (err) {
-					res.headers.statusCode = 500;
+					//					res.headers.statusCode = 500;
 					res.send("ERRROR");
 				} else {
 					res.send(zippedData);
@@ -224,4 +220,5 @@ function startServer(props) {
 			res.send(data);
 		}
 	}
+
 }

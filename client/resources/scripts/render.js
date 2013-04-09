@@ -78,8 +78,12 @@ function countFeatures(evt) {
 
 	for ( var i = 0; i < features.length; i++) {
 		ngeoms++;
-		var vertices = features[i].geometry.getVertices();
-		npoints += vertices.length;
+		if (typeof features[i].geometry === "undefined" || features[i].geometry === null) {
+			// alert("Empty geometry");
+		} else {
+			var vertices = features[i].geometry.getVertices();
+			npoints += vertices.length;
+		}
 	}
 	endCollectingData();
 }
@@ -126,15 +130,26 @@ function log(args) {
 function buildRequestUrl(type, data, gen) {
 	if (type === "pg") {
 		var table = pgTables[data].ungeneralized;
-		if (gen !== "no") {
+		if (gen !== 0) {
 			table = pgTables[data].generalized
 					+ String(gen).replace(".", "_").replace(" ", "");
 		}
 		return "pg/" + table;
+	} else {
+		return type;
 	}
-	if (type === "couchdb") {
-		return "couchdb";
-	}
+}
+
+function buildRequestParams(data, zoom, compression, precision, gen, epsg) {
+	return {
+		includegeom : true,
+		epsg : epsg,
+		genlevel : gen,
+		compression : compression,
+		precision : precision,
+		zoom : zoom,
+		featuretype : "polygon"
+	};
 }
 
 function createVecLayer() {
@@ -145,13 +160,10 @@ function createVecLayer() {
 			format : new OpenLayers.Format.GeoJSON(),
 			url : buildRequestUrl(Ext.getCmp("requestType").getValue(), Ext.getCmp(
 					"requestData").getValue(), Ext.getCmp("requestGen").getValue()),
-			params : {
-				includegeom : "true",
-				zoom : map.zoom,
-				compression : Ext.getCmp("requestComp").getValue(),
-				precision : Ext.getCmp("precision").getValue(),
-				epsg : map.displayProjection.projCode.split(":")[1]
-			}
+			params : buildRequestParams(Ext.getCmp("requestData").getValue(),
+					map.zoom, Ext.getCmp("requestComp").getValue(), Ext.getCmp(
+							"precision").getValue(), Ext.getCmp("requestGen").getValue(),
+					map.displayProjection.projCode.split(":")[1])
 		})
 	});
 }
@@ -196,7 +208,8 @@ function createForm() {
 												fieldLabel : "Request",
 												store : new Ext.data.SimpleStore({
 													data : [ [ "pg", "PostGIS" ],
-															[ "couchdb", "CouchDB" ] ],
+															[ "couchdbexact", "CouchDB exact index" ],
+															[ "couchdbbbox", "CouchDB bbox index" ] ],
 													fields : [ "value", "text" ]
 												}),
 												valueField : "value",
@@ -254,7 +267,7 @@ function createForm() {
 												displayField : "text",
 												triggerAction : "all",
 												editable : false,
-												value : true,
+												value : false,
 												onChange : removeVectorLayer
 											},
 											{
@@ -263,7 +276,7 @@ function createForm() {
 												fieldLabel : "Gen.level",
 												store : new Ext.data.SimpleStore(
 														{
-															data : [ [ "no", "Ungeneralized" ],
+															data : [ [ 0, "Ungeneralized" ],
 																	[ 0.001, "0.001 degree" ],
 																	[ 0.005, "0.005 degree" ],
 																	[ 0.01, "0.01 degree" ],
