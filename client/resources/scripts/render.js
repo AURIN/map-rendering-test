@@ -78,7 +78,8 @@ function countFeatures(evt) {
 
 	for ( var i = 0; i < features.length; i++) {
 		ngeoms++;
-		if (typeof features[i].geometry === "undefined" || features[i].geometry === null) {
+		if (typeof features[i].geometry === "undefined"
+				|| features[i].geometry === null) {
 			// alert("Empty geometry");
 		} else {
 			var vertices = features[i].geometry.getVertices();
@@ -108,7 +109,7 @@ function endCollectingData(evt) {
 		precision : Ext.getCmp("precision").getValue(),
 		requestdata : '"' + Ext.getCmp("requestData").getValue() + '"',
 		generalization : '"' + Ext.getCmp("requestGen").getValue() + '"',
-		compression : +(Ext.getCmp("requestComp").getValue() === 1) ? true : false,
+		compression : Ext.getCmp("requestComp").getValue(),
 		size : responseSize,
 		points : npoints,
 		geoms : ngeoms,
