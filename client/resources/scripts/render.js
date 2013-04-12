@@ -4,6 +4,7 @@ var ngeoms = 0;
 var npoints = 0;
 var responseSize = 0;
 var vecLayer = null;
+var baseLayer = null;
 var main;
 
 var pgTables = {
@@ -50,11 +51,12 @@ Ext.onReady(function() {
 
 	map = new OpenLayers.Map("map", options);
 
-	var googlePhysical = new OpenLayers.Layer.Google("Google Physical", {
-		"sphericalMercator" : true,
-		type : google.maps.MapTypeId.TERRAIN
-	});
-	map.addLayers([ googlePhysical ]);
+	// Adds a base layer that is small and hosted on AURIN's LAN
+	var baseLayer = new OpenLayers.Layer.WMS(
+		  "OpenLayers WMS",
+		  "http://192.43.209.46:8080/geoserver/wms",
+		  {'layers':'usa'} );
+	map.addLayer(baseLayer);
 
 	// Australia's bbox
 	var zoomToBounds = new OpenLayers.Bounds(108.0, -45.0, 155.0, -10.0)
@@ -96,7 +98,7 @@ function startCollectingData(evt) {
 	if (Ext.getCmp("requestData").getValue() !== "no") {
 		removeVectorLayer();
 		vecLayer = createVecLayer();
-		map.addLayers([ vecLayer ]);
+		map.addLayer(vecLayer);
 	}
 }
 
