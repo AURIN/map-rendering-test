@@ -37,41 +37,45 @@ var pgTables = {
 Ext.require([ "Ext.direct.*", "Ext.panel.Panel", "Ext.form.field.Text",
 		"Ext.toolbar.TextItem" ]);
 
-Ext.onReady(function() {
+Ext
+		.onReady(function() {
 
-	main = createForm();
+			main = createForm();
 
-	var options = {
-		maxExtent : zoomToBounds,
-		projection : new OpenLayers.Projection("EPSG:900913"),
-		displayProjection : new OpenLayers.Projection("EPSG:4326"),
-		units : "m",
-		maxResolution : 156543.0339
-	};
+			var options = {
+				maxExtent : zoomToBounds,
+				projection : new OpenLayers.Projection("EPSG:900913"),
+				displayProjection : new OpenLayers.Projection("EPSG:4326"),
+				units : "m",
+				maxResolution : 156543.0339
+			};
 
-	map = new OpenLayers.Map("map", options);
+			map = new OpenLayers.Map("map", options);
 
-	// Adds a base layer that is small and hosted on AURIN's LAN
-	var baseLayer = new OpenLayers.Layer.WMS(
-		  "OpenLayers WMS",
-		  "http://192.43.209.46:8080/geoserver/wms",
-		  {'layers':'usa'} );
-	map.addLayer(baseLayer);
+			// Adds a base layer that is small and hosted on AURIN's LAN
+			var baseLayer = new OpenLayers.Layer.WMS("OpenLayers WMS",
+					"http://192.43.209.46:8080/geoserver/wms", {
+						'layers' : 'usa'
+					});
+			map.addLayer(baseLayer);
 
-	// Australia's bbox
-	var zoomToBounds = new OpenLayers.Bounds(108.0, -45.0, 155.0, -10.0)
-			.transform(new OpenLayers.Projection("EPSG:4326"), map
-					.getProjectionObject());
-	map.zoomToExtent(zoomToBounds);
+			// Australia's bbox
+			var zoomToBounds = new OpenLayers.Bounds(108.0, -45.0, 155.0, -10.0)
+					.transform(new OpenLayers.Projection("EPSG:4326"), map
+							.getProjectionObject());
+			map.zoomToExtent(zoomToBounds);
 
-	// Records size of response
-	OpenLayers.Request.events.on({
-		success : countFeatures
-	});
+			// Records size of response
+			OpenLayers.Request.events.on({
+				success : countFeatures
+			});
 
-	// Re-creates and re-load a vector layer at  the start of every pan/zoom
-	map.events.register("movestart", map, startCollectingData);
-});
+			// Re-creates and re-load a vector layer at  the start of every pan/zoom
+			map.events.register("movestart", map, startCollectingData);
+
+			window
+					.alert("Loading completed: switch on a layer, zoom or pan to see data");
+		});
 
 function countFeatures(evt) {
 	var geojson_format = new OpenLayers.Format.GeoJSON();
@@ -212,7 +216,9 @@ function createForm() {
 												store : new Ext.data.SimpleStore({
 													data : [ [ "pg", "PostGIS" ],
 															[ "couchdbexact", "CouchDB exact index" ],
-															[ "couchdbbbox", "CouchDB bbox index" ] ],
+															[ "couchdbbbox", "CouchDB bbox index" ],
+															[ "couchdbstring", "CouchDB with string" ],
+															[ "couchdbkey", "CouchDB exact key index" ] ],
 													fields : [ "value", "text" ]
 												}),
 												valueField : "value",

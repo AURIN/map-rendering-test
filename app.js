@@ -100,13 +100,26 @@ function startServer(props) {
 	 */
 	app.get(/\/couchdb(.+)/, function(req, res) {
 
-		var view = (req.params[0] === "exact") ? "pbcPolygon" : "pbcExtent";
+		var view = "pbcPolygon", list = "geojson";
+
+		if (req.params[0] === "bbox") {
+			view = "pbcExtent"
+		}
+		if (req.params[0] === "string") {
+			view = "pbcPolygonString";
+			list = "geojsonString";
+		}
+		if (req.params[0] === "key") {
+			view = "pbcPolygon" + req.param("genlevel", "0.05");
+			list = "geojsonKey";
+		}
+
 		console.log("-- CouchDB request: /" + $("couchdb.db")
-				+ "/_design/geoinfo/_spatial/_list/geojson/" + view + "?bbox="
+				+ "/_design/geoinfo/_spatial/_list/" + list + "/" + view + "?bbox="
 				+ req.param("bbox", "0,0,0,0") + "&featuretype="
 				+ req.param("featuretype", "polygon") + "&genlevel="
-				+ (String(req.param("genlevel", "0_05"))).replace("_", "."));
-		db.listview("geoinfo/_spatial", "geojson", view, {
+				+ req.param("genlevel", "0.05"));
+		db.listview("geoinfo/_spatial", list, view, {
 			bbox : req.param("bbox", "0,0,0,0"),
 			featuretype : req.param("featuretype", "polygon"),
 			genlevel : req.param("genlevel", "0.05")
