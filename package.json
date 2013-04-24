@@ -3,7 +3,7 @@
   , "private": true
   , "dependencies": {
       "express": "2.5.0"
-    , "nano": "3.3.6"
+    , "nano": "git+ssh://git@github.com:AURIN/nano.git#aurin"
     , "jqtpl": "1.1.0"
     , "buffered-reader": "1.0.1"
     , "buffered-writer": "0.2.3"

@@ -2,12 +2,15 @@
 # Loads data
 #
 setwd("/usr/var/projects/aurin/git/map-rendering-test/test/result")
-pbc.df<-read.table("pbc.csv",header=T, sep=",")
-pbc04.df<-read.table("20130417results-pbc.04.csv",header=T, sep=",")
-pbc05.df<-read.table("20130417results-pbc.05.csv",header=T, sep=",")
-pbc06.df<-read.table("20130417results-pbc.06.csv",header=T, sep=",")
+#pbc.df<-read.table("pbc.csv",header=T, sep=",")
+#pbc04.df<-read.table("20130417results-pbc.04.csv",header=T, sep=",")
+#pbc05.df<-read.table("20130417results-pbc.05.csv",header=T, sep=",")
+#pbc06.df<-read.table("20130417results-pbc.06.csv",header=T, sep=",")
 #pbc07.df<-read.table("20130417results-pbc.07.csv",header=T, sep=",")
-pbc.df<-rbind(pbc.df, pbc04.df, pbc05.df, pbc06.df)
+pbc08.df<-read.table("20130424results-pbc.4prec.csv",header=T, sep=",")
+pbc09.df<-read.table("20130424results-pbc.15prec.csv",header=T, sep=",")
+#pbc.df<-rbind(pbc.df, pbc04.df, pbc05.df, pbc06.df, pbc08.df)
+pbc.df<-rbind(pbc08.df, pbc09.df)
 
 # Data clean-up
 pbc.df<-pbc.df[pbc.df$Npoints < 25000 & pbc.df$Time < 2,] # Gets rid of extreme values
@@ -15,6 +18,7 @@ pbc.df<-pbc.df[-c(333, 844),] # Gets rid of outliers
 
 # Data recoding
 pbc.df$Precision<-as.factor(pbc.df$Precision) # Transforms Precision in a factor
+
 
 #
 # Definition of analytical functions
@@ -45,6 +49,7 @@ by(pbc.df, pbc.df$Precision, summary)
 
 # Effects of precision on time
 by(pbc.df$Time, pbc.df$Precision, summary)
+by(pbc.df$PointsPerSec, pbc.df$Precision, summary)
 
 pbcTiSz <-list("mod"=Time~Size, "x"="Size", "y"="Time", title="Time(Size)")
 pbcTiPo <-list("mod"=Time~Npoints, "x"="Npoints" , "y"="Time", title="Time(Npoints)")
