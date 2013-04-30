@@ -2,19 +2,44 @@
 # Loads data
 #
 setwd("/usr/var/projects/aurin/git/map-rendering-test/test/result")
-#pbc.df<-read.table("pbc.csv",header=T, sep=",")
-#pbc04.df<-read.table("20130417results-pbc.04.csv",header=T, sep=",")
-#pbc05.df<-read.table("20130417results-pbc.05.csv",header=T, sep=",")
-#pbc06.df<-read.table("20130417results-pbc.06.csv",header=T, sep=",")
-#pbc07.df<-read.table("20130417results-pbc.07.csv",header=T, sep=",")
-pbc08.df<-read.table("20130424results-pbc.4prec.csv",header=T, sep=",")
-pbc09.df<-read.table("20130424results-pbc.15prec.csv",header=T, sep=",")
-#pbc.df<-rbind(pbc.df, pbc04.df, pbc05.df, pbc06.df, pbc08.df)
-pbc.df<-rbind(pbc08.df, pbc09.df)
+pbc.df<-read.table("pbc.csv",header=T, sep=",")
+pbc04.df<-read.table("20130417results-pbc.04.csv",header=T, sep=",")
+pbc05.df<-read.table("20130417results-pbc.05.csv",header=T, sep=",")
+pbc06.df<-read.table("20130417results-pbc.06.csv",header=T, sep=",")
+pbc07.df<-read.table("20130417results-pbc.07.csv",header=T, sep=",")
+pbc4prec.df<-read.table("20130424results-pbc.4prec.csv",header=T, sep=",")
+pbc15prec1.df<-read.table("20130424results-pbc.15prec.csv",header=T, sep=",") # Freak data ?
+pbc15prec2.df<-read.table("20130426results-pbc.15prec.csv",header=T, sep=",")
+
+pbc08.df<-read.table("20130424results-pbc.08-0.001.csv",header=T, sep=",")
+pbc09.df<-read.table("20130424results-pbc.09-0.001-red.csv",header=T, sep=",")
+pbc15prec.df<-read.table("20130424results-pbc.15prec.csv",header=T, sep=",")
+
+pbc10.df<-read.table("20130430results-e.pbc.10.csv",header=T, sep=",")
+pbc11.df<-read.table("20130430results-e.pbc.11.csv",header=T, sep=",")
+
+pbc10.df<-pbc10.df[pbc10.df$Time<1.3,]
+pbc11.df<-pbc10.df[pbc11.df$Time<1.3,]
+
+summary(pbc10.df$Ngeoms)
+summary(pbc11.df$Ngeoms)
+
+summary(pbc10.df$Points)
+summary(pbc11.df$Points)
+
+summary(pbc10.df$Time)
+summary(pbc11.df$Time)
+
+summary(pbc10.df$PointsPerSec)
+summary(pbc11.df$PointsPerSec)
+
+
+#pbc.df<-rbind(pbc04.df, pbc05.df, pbc06.df, pbc07.df, pbc08.df, pbc09.df, pbc10.df)
+pbc.df<-rbind(pbc08.df, pbc10.df)
 
 # Data clean-up
 pbc.df<-pbc.df[pbc.df$Npoints < 25000 & pbc.df$Time < 2,] # Gets rid of extreme values
-pbc.df<-pbc.df[-c(333, 844),] # Gets rid of outliers
+#pbc.df<-pbc.df[-c(333, 844),] # Gets rid of outliers
 
 # Data recoding
 pbc.df$Precision<-as.factor(pbc.df$Precision) # Transforms Precision in a factor
@@ -30,7 +55,7 @@ pbcLm<-function (df, models) {
         mod$lm<-lm(mod$mod, df)
 #        plot(df[,mod$x], df[,mod$y], col="green", pch=20, main=mod$title, xlab="")
 #        points(df[,mod$x], fitted(mod$lm), col="black", pch=20, xlab="")
-        print(cat("---------------", mod$title, "---------------"))
+        sprintf(cat("---------------", mod$title, "---------------"))
         plot(mod$lm, main=mod$title)
         print(summary(mod$lm))
         "OK"
@@ -43,6 +68,23 @@ pbcLm<-function (df, models) {
 summary(pbc.df)
 by(pbc.df, pbc.df$Precision, summary)
 
+
+lapply(list(
+#        list(df=pbc.df, title="PBC"), 
+#        list(df=pbc04.df, title="PBC04"),
+#        list(df=pbc05.df, title="PBC05"),        
+#        list(df=pbc06.df, title="PBC06"),        
+#        list(df=pbc07.df, title="PBC07"),        
+#        list(df=pbc08.df, title="PBC08"),        
+        list(df=pbc09.df, title="PBC09"),        
+        list(df=pbc10.df, title="PBC10")        
+        ), function(e) {
+          sprintf("----------------------------------")
+          sprintf(e$title)
+#          by(e$df$Time, e$df$Precision, summary)
+      by(e$df$PointsPerSec, e$df$Precision, summary)
+    })
+      
 #
 # Analysis of correlation between time and, size, points and geometries
 #
@@ -50,6 +92,8 @@ by(pbc.df, pbc.df$Precision, summary)
 # Effects of precision on time
 by(pbc.df$Time, pbc.df$Precision, summary)
 by(pbc.df$PointsPerSec, pbc.df$Precision, summary)
+
+by(pbc08.df$Time, pbc08.df$Precision, summary)
 
 pbcTiSz <-list("mod"=Time~Size, "x"="Size", "y"="Time", title="Time(Size)")
 pbcTiPo <-list("mod"=Time~Npoints, "x"="Npoints" , "y"="Time", title="Time(Npoints)")
