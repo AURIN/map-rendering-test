@@ -2,48 +2,39 @@
 # Loads data
 #
 setwd("/usr/var/projects/aurin/git/map-rendering-test/test/result")
-pbc.df<-read.table("pbc.csv",header=T, sep=",")
-pbc04.df<-read.table("20130417results-pbc.04.csv",header=T, sep=",")
-pbc05.df<-read.table("20130417results-pbc.05.csv",header=T, sep=",")
-pbc06.df<-read.table("20130417results-pbc.06.csv",header=T, sep=",")
-pbc07.df<-read.table("20130417results-pbc.07.csv",header=T, sep=",")
-pbc4prec.df<-read.table("20130424results-pbc.4prec.csv",header=T, sep=",")
-pbc15prec1.df<-read.table("20130424results-pbc.15prec.csv",header=T, sep=",") # Freak data ?
-pbc15prec2.df<-read.table("20130426results-pbc.15prec.csv",header=T, sep=",")
 
-pbc08.df<-read.table("20130424results-pbc.08-0.001.csv",header=T, sep=",")
-pbc09.df<-read.table("20130424results-pbc.09-0.001-red.csv",header=T, sep=",")
-pbc15prec.df<-read.table("20130424results-pbc.15prec.csv",header=T, sep=",")
+# Limited bandwidth data
+pbc14.df<-read.table("20130503results-e-512k.pbc.14.csv",header=T, sep=",")
+pbc15.df<-read.table("20130506results-e-512k.pbc.15.csv",header=T, sep=",")
+pbc16.df<-read.table("20130503results-e-512k.pbc.16.csv",header=T, sep=",")
+pbc17.df<-read.table("20130507results-e-512k.pbc.17.csv",header=T, sep=",")
+pbc18.df<-read.table("20130508results-e-512k.pbc.18.csv",header=T, sep=",")
+pbc19.df<-read.table("20130508results-e-512k.pbc.19.csv",header=T, sep=",")
 
-pbc10.df<-read.table("20130430results-e.pbc.10.csv",header=T, sep=",")
-pbc11.df<-read.table("20130430results-e.pbc.11.csv",header=T, sep=",")
+cols<-cbind("Type", "Precision","Dataset", "Generalization", "Compression", "Size", "Npoints", "Ngeoms","Time","PointsPerSec")
+names(pbc14.df)<-cols
+names(pbc15.df)<-cols
+names(pbc16.df)<-cols
+names(pbc17.df)<-cols
+names(pbc18.df)<-cols
+names(pbc19.df)<-cols
 
-pbc10.df<-pbc10.df[pbc10.df$Time<1.3,]
-pbc11.df<-pbc10.df[pbc11.df$Time<1.3,]
-
-summary(pbc10.df$Ngeoms)
-summary(pbc11.df$Ngeoms)
-
-summary(pbc10.df$Points)
-summary(pbc11.df$Points)
-
-summary(pbc10.df$Time)
-summary(pbc11.df$Time)
-
-summary(pbc10.df$PointsPerSec)
-summary(pbc11.df$PointsPerSec)
-
-
-#pbc.df<-rbind(pbc04.df, pbc05.df, pbc06.df, pbc07.df, pbc08.df, pbc09.df, pbc10.df)
-pbc.df<-rbind(pbc08.df, pbc10.df)
+pbc.df<-rbind(pbc14.df, pbc15.df, pbc16.df, pbc17.df, pbc18.df, pbc19.df)
 
 # Data clean-up
-pbc.df<-pbc.df[pbc.df$Npoints < 25000 & pbc.df$Time < 2,] # Gets rid of extreme values
-#pbc.df<-pbc.df[-c(333, 844),] # Gets rid of outliers
+pbc.df<-pbc.df[pbc.df$Npoints<25000,]
 
-# Data recoding
-pbc.df$Precision<-as.factor(pbc.df$Precision) # Transforms Precision in a factor
+# Recodification of variables as factors
+pbc.df$Precision<-as.factor(pbc.df$Precision) 
+pbc.df$Generalization<-as.factor(pbc.df$Generalization)
+pbc.df$Compression<-as.factor(pbc.df$Compression)
 
+#
+# First analysis to spot anomalies
+#
+by(pbc.df, pbc.df$Precision, summary)
+by(pbc.df, pbc.df$Generalization, summary)
+by(pbc.df, pbc.df$Compression, summary)
 
 #
 # Definition of analytical functions
@@ -55,7 +46,7 @@ pbcLm<-function (df, models) {
         mod$lm<-lm(mod$mod, df)
 #        plot(df[,mod$x], df[,mod$y], col="green", pch=20, main=mod$title, xlab="")
 #        points(df[,mod$x], fitted(mod$lm), col="black", pch=20, xlab="")
-        sprintf(cat("---------------", mod$title, "---------------"))
+        print(cat("---------------", mod$title, "---------------"))
         plot(mod$lm, main=mod$title)
         print(summary(mod$lm))
         "OK"
