@@ -10,6 +10,7 @@ pbc16.df<-read.table("20130503results-e-512k.pbc.16.csv",header=T, sep=",")
 pbc17.df<-read.table("20130507results-e-512k.pbc.17.csv",header=T, sep=",")
 pbc18.df<-read.table("20130508results-e-512k.pbc.18.csv",header=T, sep=",")
 pbc19.df<-read.table("20130508results-e-512k.pbc.19.csv",header=T, sep=",")
+pbc20.df<-read.table("20130508results-e-512k.pbc.20.csv",header=T, sep=",")
 
 cols<-cbind("Type", "Precision","Dataset", "Generalization", "Compression", "Size", "Npoints", "Ngeoms","Time","PointsPerSec")
 names(pbc14.df)<-cols
@@ -18,8 +19,9 @@ names(pbc16.df)<-cols
 names(pbc17.df)<-cols
 names(pbc18.df)<-cols
 names(pbc19.df)<-cols
+names(pbc20.df)<-cols
 
-pbc.df<-rbind(pbc14.df, pbc15.df, pbc16.df, pbc17.df, pbc18.df, pbc19.df)
+pbc.df<-rbind(pbc14.df, pbc15.df, pbc16.df, pbc17.df, pbc18.df, pbc19.df, pbc20.df)
 
 # Data clean-up
 pbc.df<-pbc.df[pbc.df$Npoints<25000,]
