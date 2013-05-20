@@ -10,8 +10,8 @@ pbc16.df<-read.table("20130503results-e-512k.pbc.16.csv",header=T, sep=",")
 pbc17.df<-read.table("20130507results-e-512k.pbc.17.csv",header=T, sep=",")
 pbc18.df<-read.table("20130508results-e-512k.pbc.18.csv",header=T, sep=",")
 pbc19.df<-read.table("20130508results-e-512k.pbc.19.csv",header=T, sep=",")
-pbc20.df<-read.table("20130508results-e-512k.pbc.20.csv",header=T, sep=",")
-pbc21.df<-read.table("20130508results-e-512k.pbc.21.csv",header=T, sep=",")
+pbc20.df<-read.table("20130510results-e-512k.pbc.20.csv",header=T, sep=",")
+pbc21.df<-read.table("20130515results-e-512k.pbc.21.csv",header=T, sep=",")
 
 cols<-cbind("Type", "Precision","Dataset", "Generalization", "Compression", "Size", "Npoints", "Ngeoms","Time","PointsPerSec")
 names(pbc14.df)<-cols
@@ -32,6 +32,8 @@ pbc.df<-pbc.df[pbc.df$Npoints<25000,]
 pbc.df$Precision<-as.factor(pbc.df$Precision) 
 pbc.df$Generalization<-as.factor(pbc.df$Generalization)
 pbc.df$Compression<-as.factor(pbc.df$Compression)
+
+xtabs(~Precision+Generalization+Compression, pbc.df)
 
 #
 # First analysis to spot anomalies
@@ -71,15 +73,15 @@ lapply(list(
 #        list(df=pbc06.df, title="PBC06"),        
 #        list(df=pbc07.df, title="PBC07"),        
 #        list(df=pbc08.df, title="PBC08"),        
-        list(df=pbc09.df, title="PBC09"),        
-        list(df=pbc10.df, title="PBC10")        
-        ), function(e) {
-          sprintf("----------------------------------")
-          sprintf(e$title)
+#        list(df=pbc09.df, title="PBC09"),        
+#        list(df=pbc10.df, title="PBC10")        
+    ), function(e) {
+      sprintf("----------------------------------")
+      sprintf(e$title)
 #          by(e$df$Time, e$df$Precision, summary)
       by(e$df$PointsPerSec, e$df$Precision, summary)
     })
-      
+
 #
 # Analysis of correlation between time and, size, points and geometries
 #
@@ -87,8 +89,6 @@ lapply(list(
 # Effects of precision on time
 by(pbc.df$Time, pbc.df$Precision, summary)
 by(pbc.df$PointsPerSec, pbc.df$Precision, summary)
-
-by(pbc08.df$Time, pbc08.df$Precision, summary)
 
 pbcTiSz <-list("mod"=Time~Size, "x"="Size", "y"="Time", title="Time(Size)")
 pbcTiPo <-list("mod"=Time~Npoints, "x"="Npoints" , "y"="Time", title="Time(Npoints)")
@@ -118,10 +118,10 @@ pbcLm(pbc.df.prec4,
 pbc.df.prec15<-pbc.df[pbc.df$Precision==15,]
 summary(pbc.df.prec15)
 pbcLm(pbc.df.prec15, 
-        list( 
-            list("mod"=PointsPerSec~log(Npoints), "x"=pbc.df.prec15$Npoints, "y"=pbc.df.prec15$PointsPerSec) 
+    list( 
+        list("mod"=PointsPerSec~log(Npoints), "x"=pbc.df.prec15$Npoints, "y"=pbc.df.prec15$PointsPerSec) 
     ))
-   
+
 # Analyzes correlation between throughput and, size, points and geometries
 par(mfrow = c(3, 1))
 plot(pbc.df$Points, pbc.df$PointsPerSec, col="green", pch=20)
