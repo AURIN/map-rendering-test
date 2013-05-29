@@ -13,6 +13,8 @@ pbc19.df<-read.table("20130508results-e-512k.pbc.19.csv",header=T, sep=",")
 pbc20.df<-read.table("20130510results-e-512k.pbc.20.csv",header=T, sep=",")
 pbc21.df<-read.table("20130515results-e-512k.pbc.21.csv",header=T, sep=",")
 pbc22.df<-read.table("20130520results-e-512k-HTTP.pbc.22.csv",header=T, sep=",")
+pbc23.df<-read.table("20130528results-e-512k-HTTP.pbc.23.csv",header=T, sep=",")
+pbc26.df<-read.table("20130528results-e-512k-HTTP.pbc.26.csv",header=T, sep=",")
 
 cols<-cbind("Type", "Precision","Dataset", "Generalization", "Compression", "Size", "Npoints", "Ngeoms","Time","PointsPerSec")
 names(pbc14.df)<-cols
@@ -24,28 +26,29 @@ names(pbc19.df)<-cols
 names(pbc20.df)<-cols
 names(pbc21.df)<-cols
 names(pbc22.df)<-cols
+names(pbc23.df)<-cols
+names(pbc26.df)<-cols
 
 pbc.df<-rbind(pbc14.df, pbc15.df, pbc16.df, pbc17.df, pbc18.df, pbc19.df, pbc20.df, pbc21.df)
-pbch.df<-rbind(pbc22.df)
+pbch.df<-rbind(pbc22.df, pbc23.df, pbc26.df)
 
 # Data clean-up
 pbc.df<-pbc.df[pbc.df$Npoints<25000,]
 pbch.df<-pbch.df[pbch.df$Npoints<25000,]
+pbch.df$Protocol<-"http"
+pbc.df$Protocol<-"https"
+pbc.df<-rbind(pbc.df, pbch.df)
 
 # Recodification of variables as factors
 pbc.df$Precision<-as.factor(pbc.df$Precision) 
 pbc.df$Generalization<-as.factor(pbc.df$Generalization)
 pbc.df$Compression<-as.factor(pbc.df$Compression)
-pbch.df$Precision<-as.factor(pbch.df$Precision) 
-pbch.df$Generalization<-as.factor(pbch.df$Generalization)
-pbch.df$Compression<-as.factor(pbch.df$Compression)
-
-pbcs.df<-subset(pbc.df, Compression=="false" & Generalization==0.05 & Precision==15)
+pbc.df$Protocol<-as.factor(pbc.df$Protocol)
 
 #
 # xtab to check that every combination of values have been tested
 #
-xtabs(~Precision+Generalization+Compression, pbc.df)
+xtabs(~Precision+Generalization+Compression+Protocol, pbc.df)
 
 #
 # First analysis to spot anomalies
@@ -53,6 +56,7 @@ xtabs(~Precision+Generalization+Compression, pbc.df)
 by(pbc.df, pbc.df$Precision, summary)
 by(pbc.df, pbc.df$Generalization, summary)
 by(pbc.df, pbc.df$Compression, summary)
+by(pbc.df, pbc.df$Protocol, summary)
 
 
 
