@@ -42,11 +42,13 @@ names(pbc28.df)<-cols
 names(pbc29.df)<-cols
 
 pbc.df<-rbind(pbc14.df, pbc15.df, pbc16.df, pbc17.df, pbc18.df, pbc19.df, pbc20.df, pbc21.df)
-pbch.df<-rbind(pbc22.df, pbc23.df, pbc24.df, pbc25.df, pbc26.df, pbc26.df, pbc28.df, pbc29.df)
+pbch.df<-rbind(pbc22.df, pbc23.df, pbc24.df, pbc25.df, pbc26.df, pbc27.df, pbc28.df, pbc29.df)
 
 # Data clean-up
 pbc.df<-pbc.df[pbc.df$Npoints<25000,]
 pbch.df<-pbch.df[pbch.df$Npoints<25000,]
+pbc.df<-pbc.df[pbc.df$Time<10,]
+pbch.df<-pbch.df[pbch.df$Time<10,]
 pbch.df$Protocol<-"http"
 pbc.df$Protocol<-"https"
 pbc.df<-rbind(pbc.df, pbch.df)
@@ -68,7 +70,7 @@ xtabs(~Precision+Generalization+Compression+Protocol, pbc.df)
 by(pbc.df, pbc.df$Precision, summary)
 by(pbc.df, pbc.df$Generalization, summary)
 by(pbc.df, pbc.df$Compression, summary)
-by(pbc.df, pbc.df$Protocol, summary)
+by(cbind(pbc.df$Time, pbc.df$Size, pbc.df$PointsPerSec), pbc.df$Protocol, summary)
 
 
 
