@@ -12,9 +12,16 @@ pbc18.df<-read.table("20130508results-e-512k.pbc.18.csv",header=T, sep=",")
 pbc19.df<-read.table("20130508results-e-512k.pbc.19.csv",header=T, sep=",")
 pbc20.df<-read.table("20130510results-e-512k.pbc.20.csv",header=T, sep=",")
 pbc21.df<-read.table("20130515results-e-512k.pbc.21.csv",header=T, sep=",")
-pbc22.df<-read.table("20130520results-e-512k-HTTP.pbc.22.csv",header=T, sep=",")
-pbc23.df<-read.table("20130528results-e-512k-HTTP.pbc.23.csv",header=T, sep=",")
-pbc26.df<-read.table("20130528results-e-512k-HTTP.pbc.26.csv",header=T, sep=",")
+
+pbc22.df<-read.table("20130601results-e-512k-HTTP.pbc.22.csv",header=T, sep=",")
+pbc23.df<-read.table("20130601results-e-512k-HTTP.pbc.23.csv",header=T, sep=",")
+pbc24.df<-read.table("20130602results-e-512k-HTTP.pbc.24.csv",header=T, sep=",")
+pbc25.df<-read.table("20130602results-e-512k-HTTP.pbc.25.csv",header=T, sep=",")
+pbc27.df<-read.table("20130603results-e-512k-HTTP.pbc.27.csv",header=T, sep=",")
+pbc29.df<-read.table("20130603results-e-512k-HTTP.pbc.29.csv",header=T, sep=",")
+pbc26.df<-read.table("20130604results-e-512k-HTTP.pbc.26.csv",header=T, sep=",")
+pbc28.df<-read.table("20130606results-e-512k-HTTP.pbc.28.csv",header=T, sep=",")
+
 
 cols<-cbind("Type", "Precision","Dataset", "Generalization", "Compression", "Size", "Npoints", "Ngeoms","Time","PointsPerSec")
 names(pbc14.df)<-cols
@@ -27,10 +34,15 @@ names(pbc20.df)<-cols
 names(pbc21.df)<-cols
 names(pbc22.df)<-cols
 names(pbc23.df)<-cols
+names(pbc24.df)<-cols
+names(pbc25.df)<-cols
 names(pbc26.df)<-cols
+names(pbc27.df)<-cols
+names(pbc28.df)<-cols
+names(pbc29.df)<-cols
 
 pbc.df<-rbind(pbc14.df, pbc15.df, pbc16.df, pbc17.df, pbc18.df, pbc19.df, pbc20.df, pbc21.df)
-pbch.df<-rbind(pbc22.df, pbc23.df, pbc26.df)
+pbch.df<-rbind(pbc22.df, pbc23.df, pbc24.df, pbc25.df, pbc26.df, pbc26.df, pbc28.df, pbc29.df)
 
 # Data clean-up
 pbc.df<-pbc.df[pbc.df$Npoints<25000,]
