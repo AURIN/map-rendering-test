@@ -22,6 +22,8 @@ pbc29.df<-read.table("20130603results-e-512k-HTTP.pbc.29.csv",header=T, sep=",")
 pbc26.df<-read.table("20130604results-e-512k-HTTP.pbc.26.csv",header=T, sep=",")
 pbc28.df<-read.table("20130606results-e-512k-HTTP.pbc.28.csv",header=T, sep=",")
 
+pbc30.df<-read.table("20130617results-e-512k-HTTP.pbc.30.csv",header=T, sep=",")
+pbc31.df<-read.table("20130618results-e-512k-HTTP.pbc.31.csv",header=T, sep=",")
 
 cols<-cbind("Type", "Precision","Dataset", "Generalization", "Compression", "Size", "Npoints", "Ngeoms","Time","PointsPerSec")
 names(pbc14.df)<-cols
@@ -40,6 +42,10 @@ names(pbc26.df)<-cols
 names(pbc27.df)<-cols
 names(pbc28.df)<-cols
 names(pbc29.df)<-cols
+
+# Used only to double-check HTTP data 
+# names(pbc30.df)<-cols
+# names(pbc31.df)<-cols
 
 pbc.df<-rbind(pbc14.df, pbc15.df, pbc16.df, pbc17.df, pbc18.df, pbc19.df, pbc20.df, pbc21.df)
 pbch.df<-rbind(pbc22.df, pbc23.df, pbc24.df, pbc25.df, pbc26.df, pbc27.df, pbc28.df, pbc29.df)
@@ -71,7 +77,6 @@ by(pbc.df, pbc.df$Precision, summary)
 by(pbc.df, pbc.df$Generalization, summary)
 by(pbc.df, pbc.df$Compression, summary)
 by(cbind(pbc.df$Time, pbc.df$Size, pbc.df$PointsPerSec), pbc.df$Protocol, summary)
-
 
 
 t.test(pbc.df$Time[pbc.df$Compression=="true"] ,pbc.df$Time[pbc.df$Compression=="false"], conf.level=0.99)
