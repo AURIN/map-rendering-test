@@ -287,6 +287,72 @@ pointLabel(mx, my, labels = paste("  ", mlabs, "  ", sep=""), cex=0.7)
 
 #------------------------------------------------------------------------------------------------------------
 
+#T-tests
+#Largest differences in mean Time
+t.test(pbcSel(pbc.df, 0.01, "false", 15, "http")$Time, 
+    pbcSel(pbc.df, 0.01, "false", 15, "https")$Time)
+
+t.test(pbcSel(pbc.df, 0.01, "false", 4, "http")$Time, 
+    pbcSel(pbc.df, 0.01, "false", 4, "https")$Time)
+
+
+#Largest differences in mean Throughput
+t.test(pbcSel(pbc.df, 0.05, "true", 15, "http")$PointsPerSec, 
+    pbcSel(pbc.df, 0.05, "true", 15, "https")$PointsPerSec)
+
+
+t.test(pbcSel(pbc.df, 0.05, "true", 4, "http")$PointsPerSec, 
+    pbcSel(pbc.df, 0.05, "true", 4, "https")$PointsPerSec)
+
+
+#T-test shows no significant difference between largest differences in time and largest difference in throughput, all results fall within the 95% confidence interval.
+
+
+
+#T-test for largest difference between generalization
+t.test(pbcSel(pbc.df, 0.01, "false", 15, "https")$PointsPerSec, 
+    pbcSel(pbc.df, 0.05, "false", 15, "https")$PointsPerSec)
+
+t.test(pbcSel(pbc.df, 0.01, "false", 15, "https")$Time, 
+    pbcSel(pbc.df, 0.05, "false", 15, "https")$Time)
+
+
+t.test(pbcSel(pbc.df, 0.01, "true", 15, "https")$PointsPerSec, 
+    pbcSel(pbc.df, 0.05, "true", 15, "https")$PointsPerSec)
+
+t.test(pbcSel(pbc.df, 0.01, "true", 15, "https")$Time, 
+    pbcSel(pbc.df, 0.05, "true", 15, "https")$Time)
+
+
+t.test(pbcSel(pbc.df, 0.01, "true", 4, "https")$PointsPerSec, 
+    pbcSel(pbc.df, 0.05, "true", 4, "https")$PointsPerSec)
+
+t.test(pbcSel(pbc.df, 0.01, "true", 4, "https")$Time, 
+    pbcSel(pbc.df, 0.05, "true", 4, "https")$Time)
+
+
+
+#Generate histograms of Throughput and Time for each configuration, limited to less than 2 seconds.
+
+hist(dist(pbc22.df$PointsPerSec), breaks=100)
+hist(dist(pbc23.df$PointsPerSec), breaks=100)
+hist(dist(pbc24.df$PointsPerSec), breaks=100)
+hist(dist(pbc25.df$PointsPerSec), breaks=100)
+hist(dist(pbc26.df$PointsPerSec), breaks=100)
+hist(dist(pbc27.df$PointsPerSec), breaks=100)
+hist(dist(pbc28.df$PointsPerSec), breaks=100)
+hist(dist(pbc29.df$PointsPerSec), breaks=100)
+
+hist(dist(pbc22.df$Time), breaks=1000, xlim=c(0,2))
+hist(dist(pbc23.df$Time), breaks=1000, xlim=c(0,2))
+hist(dist(pbc24.df$Time), breaks=1000, xlim=c(0,2))
+hist(dist(pbc25.df$Time), breaks=1000, xlim=c(0,2))
+hist(dist(pbc26.df$Time), breaks=1000, xlim=c(0,2))
+hist(dist(pbc27.df$Time), breaks=1000, xlim=c(0,2))
+hist(dist(pbc28.df$Time), breaks=1000, xlim=c(0,2))
+hist(dist(pbc29.df$Time), breaks=1000, xlim=c(0,2))
+
+
 #
 # Definition of analytical functions
 #
