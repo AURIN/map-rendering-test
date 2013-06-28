@@ -81,7 +81,211 @@ by(cbind(pbc.df$Time, pbc.df$Size, pbc.df$PointsPerSec), pbc.df$Protocol, summar
 
 t.test(pbc.df$Time[pbc.df$Compression=="true"] ,pbc.df$Time[pbc.df$Compression=="false"], conf.level=0.99)
 
+#
+# Functions to compute means of Time and Throughput nad returns a label for it
+#
+pbcLabel<-function (df, gen, comp, prec, prot) {
+  paste(gen, ifelse(comp=="true", "T", "F"), prec,  ifelse(prot=="http", "H", "S"), sep="")
+}
 
+pbcSel<-function (df, gen, comp, prec, prot) {
+  subset(df, Generalization==gen & Compression==comp & Precision==prec & Protocol==prot)
+}
+
+compMeanTime<-function(df, gen, comp, prec, prot) {
+  list(pbcLabel(df, gen, comp, prec, prot),
+      mean(pbcSel(df, gen, comp, prec, prot)$Time)
+  )
+}
+
+compMeanPPS<-function(df, gen, comp, prec, prot) {
+  list(pbcLabel(df, gen, comp, prec, prot),
+      mean(pbcSel(df, gen, comp, prec, prot)$PointsPerSec)
+  )
+}
+
+#
+# Computes means of Throughput and Time
+#
+pbc.mtih<-rbind(
+  compMeanTime(pbc.df, 0.05, "true", 15, "http"),
+  compMeanTime(pbc.df, 0.05, "true", 4, "http"),
+  compMeanTime(pbc.df, 0.05, "false", 15, "http"),
+  compMeanTime(pbc.df, 0.05, "false", 4, "http"),
+  compMeanTime(pbc.df, 0.01, "true", 15, "http"),
+  compMeanTime(pbc.df, 0.01, "true", 4, "http"),
+  compMeanTime(pbc.df, 0.01, "false", 15, "http"),
+  compMeanTime(pbc.df, 0.01, "false", 4, "http")
+)
+
+pbc.mtis<-rbind(
+    compMeanTime(pbc.df, 0.05, "true", 15, "https"),
+    compMeanTime(pbc.df, 0.05, "true", 4, "https"),
+    compMeanTime(pbc.df, 0.05, "false", 15, "https"),
+    compMeanTime(pbc.df, 0.05, "false", 4, "https"),
+    compMeanTime(pbc.df, 0.01, "true", 15, "https"),
+    compMeanTime(pbc.df, 0.01, "true", 4, "https"),
+    compMeanTime(pbc.df, 0.01, "false", 15, "https"),
+    compMeanTime(pbc.df, 0.01, "false", 4, "https")
+)
+
+pbc.mppsh<-rbind(
+    compMeanPPS(pbc.df, 0.05, "true", 15, "http"),
+    compMeanPPS(pbc.df, 0.05, "true", 4, "http"),
+    compMeanPPS(pbc.df, 0.05, "false", 15, "http"),
+    compMeanPPS(pbc.df, 0.05, "false", 4, "http"),
+    compMeanPPS(pbc.df, 0.01, "true", 15, "http"),
+    compMeanPPS(pbc.df, 0.01, "true", 4, "http"),
+    compMeanPPS(pbc.df, 0.01, "false", 15, "http"),
+    compMeanPPS(pbc.df, 0.01, "false", 4, "http")
+)
+
+pbc.mppss<-rbind(
+    compMeanPPS(pbc.df, 0.05, "true", 15, "https"),
+    compMeanPPS(pbc.df, 0.05, "true", 4, "https"),
+    compMeanPPS(pbc.df, 0.05, "false", 15, "https"),
+    compMeanPPS(pbc.df, 0.05, "false", 4, "https"),
+    compMeanPPS(pbc.df, 0.01, "true", 15, "https"),
+    compMeanPPS(pbc.df, 0.01, "true", 4, "https"),
+    compMeanPPS(pbc.df, 0.01, "false", 15, "https"),
+    compMeanPPS(pbc.df, 0.01, "false", 4, "https")
+)
+
+#
+# Plot Time vs Throughput
+#
+plot(pbc.mppsh[,2], pbc.mtih[,2], ylab = "Time (s)", xlab = "Throughput (pts/s)", col="blue",
+    xlim=c(4000,11000), ylim=c(0.15, 0.7))
+pointLabel(pbc.mppsh[,2], pbc.mtih[,2], labels = paste("  ", pbc.mtih[,1], "  ", sep=""), cex=0.7)
+
+points(pbc.mppss[,2], pbc.mtis[,2], col="red")
+pointLabel(pbc.mppss[,2], pbc.mtis[,2], labels = paste("  ", pbc.mtis[,1], "  ", sep=""), cex=0.7)
+
+title("Mean Time vs Throughput", cex.main = 1,   font.main= 2)
+
+#
+# T-test Time means of different combination of factors
+#
+t.test(pbcSel(pbc.df, 0.01, "false", 15, "http")$Time, 
+    pbcSel(pbc.df, 0.01, "false", 15, "https")$Time)
+
+# Error in if (stderr < 10 * .Machine$double.eps * max(abs(mx), abs(my))) stop("data are essentially constant") : 
+#   missing value where TRUE/FALSE needed
+# In addition: Warning messages:
+# 1: In mean.default(x) : argument is not numeric or logical: returning NA
+# 2: In var(x) : NAs introduced by coercion
+# 3: In mean.default(y) : argument is not numeric or logical: returning NA
+# 4: In var(y) : NAs introduced by coercion
+
+
+
+
+#Plot mean time and throughput against: Precision, Generalization, Compression and Protocol
+
+
+mTH05T15<-mean(pbc.df$Time[pbc.df$Generalization==0.05 & pbc.df$Compression=="true" & pbc.df$Precision==15 & pbc.df$Protocol=="http"])
+mTH05F15<-mean(pbc.df$Time[pbc.df$Generalization==0.05 & pbc.df$Compression=="false" & pbc.df$Precision==15 & pbc.df$Protocol=="http"])
+mTH05T04<-mean(pbc.df$Time[pbc.df$Generalization==0.05 & pbc.df$Compression=="true" & pbc.df$Precision==4 & pbc.df$Protocol=="http"])
+mTH05F04<-mean(pbc.df$Time[pbc.df$Generalization==0.05 & pbc.df$Compression=="false" & pbc.df$Precision==4 & pbc.df$Protocol=="http"])
+mTH01T15<-mean(pbc.df$Time[pbc.df$Generalization==0.01 & pbc.df$Compression=="true" & pbc.df$Precision==15 & pbc.df$Protocol=="http"])
+mTH01F15<-mean(pbc.df$Time[pbc.df$Generalization==0.01 & pbc.df$Compression=="false" & pbc.df$Precision==15 & pbc.df$Protocol=="http"])
+mTH01T04<-mean(pbc.df$Time[pbc.df$Generalization==0.01 & pbc.df$Compression=="true" & pbc.df$Precision==4 & pbc.df$Protocol=="http"])
+mTH01F04<-mean(pbc.df$Time[pbc.df$Generalization==0.01 & pbc.df$Compression=="false" & pbc.df$Precision==4 & pbc.df$Protocol=="http"])
+
+mTS05T15<-mean(pbc.df$Time[pbc.df$Generalization==0.05 & pbc.df$Compression=="true" & pbc.df$Precision==15 & pbc.df$Protocol=="https"])
+mTS05F15<-mean(pbc.df$Time[pbc.df$Generalization==0.05 & pbc.df$Compression=="false" & pbc.df$Precision==15 & pbc.df$Protocol=="https"])
+mTS05T04<-mean(pbc.df$Time[pbc.df$Generalization==0.05 & pbc.df$Compression=="true" & pbc.df$Precision==4 & pbc.df$Protocol=="https"])
+mTS05F04<-mean(pbc.df$Time[pbc.df$Generalization==0.05 & pbc.df$Compression=="false" & pbc.df$Precision==4 & pbc.df$Protocol=="https"])
+mTS01T15<-mean(pbc.df$Time[pbc.df$Generalization==0.01 & pbc.df$Compression=="true" & pbc.df$Precision==15 & pbc.df$Protocol=="https"])
+mTS01F15<-mean(pbc.df$Time[pbc.df$Generalization==0.01 & pbc.df$Compression=="false" & pbc.df$Precision==15 & pbc.df$Protocol=="https"])
+mTS01T04<-mean(pbc.df$Time[pbc.df$Generalization==0.01 & pbc.df$Compression=="true" & pbc.df$Precision==4 & pbc.df$Protocol=="https"])
+mTS01F04<-mean(pbc.df$Time[pbc.df$Generalization==0.01 & pbc.df$Compression=="false" & pbc.df$Precision==4 & pbc.df$Protocol=="https"])
+
+mPH05T15<-mean(pbc.df$PointsPerSec[pbc.df$Generalization==0.05 & pbc.df$Compression=="true" & pbc.df$Precision==15 & pbc.df$Protocol=="http"])
+mPH05F15<-mean(pbc.df$PointsPerSec[pbc.df$Generalization==0.05 & pbc.df$Compression=="false" & pbc.df$Precision==15 & pbc.df$Protocol=="http"])
+mPH05T04<-mean(pbc.df$PointsPerSec[pbc.df$Generalization==0.05 & pbc.df$Compression=="true" & pbc.df$Precision==4 & pbc.df$Protocol=="http"])
+mPH05F04<-mean(pbc.df$PointsPerSec[pbc.df$Generalization==0.05 & pbc.df$Compression=="false" & pbc.df$Precision==4 & pbc.df$Protocol=="http"])
+mPH01T15<-mean(pbc.df$PointsPerSec[pbc.df$Generalization==0.01 & pbc.df$Compression=="true" & pbc.df$Precision==15 & pbc.df$Protocol=="http"])
+mPH01F15<-mean(pbc.df$PointsPerSec[pbc.df$Generalization==0.01 & pbc.df$Compression=="false" & pbc.df$Precision==15 & pbc.df$Protocol=="http"])
+mPH01T04<-mean(pbc.df$PointsPerSec[pbc.df$Generalization==0.01 & pbc.df$Compression=="true" & pbc.df$Precision==4 & pbc.df$Protocol=="http"])
+mPH01F04<-mean(pbc.df$PointsPerSec[pbc.df$Generalization==0.01 & pbc.df$Compression=="false" & pbc.df$Precision==4 & pbc.df$Protocol=="http"])
+
+mPS05T15<-mean(pbc.df$PointsPerSec[pbc.df$Generalization==0.05 & pbc.df$Compression=="true" & pbc.df$Precision==15 & pbc.df$Protocol=="https"])
+mPS05F15<-mean(pbc.df$PointsPerSec[pbc.df$Generalization==0.05 & pbc.df$Compression=="false" & pbc.df$Precision==15 & pbc.df$Protocol=="https"])
+mPS05T04<-mean(pbc.df$PointsPerSec[pbc.df$Generalization==0.05 & pbc.df$Compression=="true" & pbc.df$Precision==4 & pbc.df$Protocol=="https"])
+mPS05F04<-mean(pbc.df$PointsPerSec[pbc.df$Generalization==0.05 & pbc.df$Compression=="false" & pbc.df$Precision==4 & pbc.df$Protocol=="https"])
+mPS01T15<-mean(pbc.df$PointsPerSec[pbc.df$Generalization==0.01 & pbc.df$Compression=="true" & pbc.df$Precision==15 & pbc.df$Protocol=="https"])
+mPS01F15<-mean(pbc.df$PointsPerSec[pbc.df$Generalization==0.01 & pbc.df$Compression=="false" & pbc.df$Precision==15 & pbc.df$Protocol=="https"])
+mPS01T04<-mean(pbc.df$PointsPerSec[pbc.df$Generalization==0.01 & pbc.df$Compression=="true" & pbc.df$Precision==4 & pbc.df$Protocol=="https"])
+mPS01F04<-mean(pbc.df$PointsPerSec[pbc.df$Generalization==0.01 & pbc.df$Compression=="false" & pbc.df$Precision==4 & pbc.df$Protocol=="https"])
+
+my = c(mTH05T15, mTH05F15, mTH05T04, mTH05F04, mTH01T15, mTH01F15, mTH01T04, mTH01F04, mTS05T15, mTS05F15, mTS05T04, mTS05F04, mTS01T15, mTS01F15, mTS01T04, mTS01F04)
+mx = c(mPH05T15, mPH05F15, mPH05T04, mPH05F04, mPH01T15, mPH01F15, mPH01T04, mPH01F04, mPS05T15, mPS05F15, mPS05T04, mPS05F04, mPS01T15, mPS01F15, mPS01T04, mPS01F04)
+mlabs = c("H05T15", "H05F15", "H05T04", "H05F04", "H01T15", "H01F15", "H01T04", "H01F04", "S05T15", "S05F15", "S05T04", "S05F04", "S01T15", "S01F15", "S01T04", "S01F04") 
+
+plot(mx, my, ylab = "Time (s)", xlab = "Throughput (pts/s)", col="blue")
+title("Mean Time vs Throughput", cex.main = 1,   font.main= 2, col.main= "blue")
+
+require(maptools)
+pointLabel(mx, my, labels = paste("  ", mlabs, "  ", sep=""), cex=0.7)
+
+
+#------------------------------------------------------------------------------------------------------------
+
+#Plot median time and throughput against: Precision, Generalization, Compression and Protocol
+
+
+dTH05T15<-median(pbc.df$Time[pbc.df$Generalization==0.05 & pbc.df$Compression=="true" & pbc.df$Precision==15 & pbc.df$Protocol=="http"])
+dTH05F15<-median(pbc.df$Time[pbc.df$Generalization==0.05 & pbc.df$Compression=="false" & pbc.df$Precision==15 & pbc.df$Protocol=="http"])
+dTH05T04<-median(pbc.df$Time[pbc.df$Generalization==0.05 & pbc.df$Compression=="true" & pbc.df$Precision==4 & pbc.df$Protocol=="http"])
+dTH05F04<-median(pbc.df$Time[pbc.df$Generalization==0.05 & pbc.df$Compression=="false" & pbc.df$Precision==4 & pbc.df$Protocol=="http"])
+dTH01T15<-median(pbc.df$Time[pbc.df$Generalization==0.01 & pbc.df$Compression=="true" & pbc.df$Precision==15 & pbc.df$Protocol=="http"])
+dTH01F15<-median(pbc.df$Time[pbc.df$Generalization==0.01 & pbc.df$Compression=="false" & pbc.df$Precision==15 & pbc.df$Protocol=="http"])
+dTH01T04<-median(pbc.df$Time[pbc.df$Generalization==0.01 & pbc.df$Compression=="true" & pbc.df$Precision==4 & pbc.df$Protocol=="http"])
+dTH01F04<-median(pbc.df$Time[pbc.df$Generalization==0.01 & pbc.df$Compression=="false" & pbc.df$Precision==4 & pbc.df$Protocol=="http"])
+
+dTS05T15<-median(pbc.df$Time[pbc.df$Generalization==0.05 & pbc.df$Compression=="true" & pbc.df$Precision==15 & pbc.df$Protocol=="https"])
+dTS05F15<-median(pbc.df$Time[pbc.df$Generalization==0.05 & pbc.df$Compression=="false" & pbc.df$Precision==15 & pbc.df$Protocol=="https"])
+dTS05T04<-median(pbc.df$Time[pbc.df$Generalization==0.05 & pbc.df$Compression=="true" & pbc.df$Precision==4 & pbc.df$Protocol=="https"])
+dTS05F04<-median(pbc.df$Time[pbc.df$Generalization==0.05 & pbc.df$Compression=="false" & pbc.df$Precision==4 & pbc.df$Protocol=="https"])
+dTS01T15<-median(pbc.df$Time[pbc.df$Generalization==0.01 & pbc.df$Compression=="true" & pbc.df$Precision==15 & pbc.df$Protocol=="https"])
+dTS01F15<-median(pbc.df$Time[pbc.df$Generalization==0.01 & pbc.df$Compression=="false" & pbc.df$Precision==15 & pbc.df$Protocol=="https"])
+dTS01T04<-median(pbc.df$Time[pbc.df$Generalization==0.01 & pbc.df$Compression=="true" & pbc.df$Precision==4 & pbc.df$Protocol=="https"])
+dTS01F04<-median(pbc.df$Time[pbc.df$Generalization==0.01 & pbc.df$Compression=="false" & pbc.df$Precision==4 & pbc.df$Protocol=="https"])
+
+dPH05T15<-median(pbc.df$PointsPerSec[pbc.df$Generalization==0.05 & pbc.df$Compression=="true" & pbc.df$Precision==15 & pbc.df$Protocol=="http"])
+dPH05F15<-median(pbc.df$PointsPerSec[pbc.df$Generalization==0.05 & pbc.df$Compression=="false" & pbc.df$Precision==15 & pbc.df$Protocol=="http"])
+dPH05T04<-median(pbc.df$PointsPerSec[pbc.df$Generalization==0.05 & pbc.df$Compression=="true" & pbc.df$Precision==4 & pbc.df$Protocol=="http"])
+dPH05F04<-median(pbc.df$PointsPerSec[pbc.df$Generalization==0.05 & pbc.df$Compression=="false" & pbc.df$Precision==4 & pbc.df$Protocol=="http"])
+dPH01T15<-median(pbc.df$PointsPerSec[pbc.df$Generalization==0.01 & pbc.df$Compression=="true" & pbc.df$Precision==15 & pbc.df$Protocol=="http"])
+dPH01F15<-median(pbc.df$PointsPerSec[pbc.df$Generalization==0.01 & pbc.df$Compression=="false" & pbc.df$Precision==15 & pbc.df$Protocol=="http"])
+dPH01T04<-median(pbc.df$PointsPerSec[pbc.df$Generalization==0.01 & pbc.df$Compression=="true" & pbc.df$Precision==4 & pbc.df$Protocol=="http"])
+dPH01F04<-median(pbc.df$PointsPerSec[pbc.df$Generalization==0.01 & pbc.df$Compression=="false" & pbc.df$Precision==4 & pbc.df$Protocol=="http"])
+
+dPS05T15<-median(pbc.df$PointsPerSec[pbc.df$Generalization==0.05 & pbc.df$Compression=="true" & pbc.df$Precision==15 & pbc.df$Protocol=="https"])
+dPS05F15<-median(pbc.df$PointsPerSec[pbc.df$Generalization==0.05 & pbc.df$Compression=="false" & pbc.df$Precision==15 & pbc.df$Protocol=="https"])
+dPS05T04<-median(pbc.df$PointsPerSec[pbc.df$Generalization==0.05 & pbc.df$Compression=="true" & pbc.df$Precision==4 & pbc.df$Protocol=="https"])
+dPS05F04<-median(pbc.df$PointsPerSec[pbc.df$Generalization==0.05 & pbc.df$Compression=="false" & pbc.df$Precision==4 & pbc.df$Protocol=="https"])
+dPS01T15<-median(pbc.df$PointsPerSec[pbc.df$Generalization==0.01 & pbc.df$Compression=="true" & pbc.df$Precision==15 & pbc.df$Protocol=="https"])
+dPS01F15<-median(pbc.df$PointsPerSec[pbc.df$Generalization==0.01 & pbc.df$Compression=="false" & pbc.df$Precision==15 & pbc.df$Protocol=="https"])
+dPS01T04<-median(pbc.df$PointsPerSec[pbc.df$Generalization==0.01 & pbc.df$Compression=="true" & pbc.df$Precision==4 & pbc.df$Protocol=="https"])
+dPS01F04<-median(pbc.df$PointsPerSec[pbc.df$Generalization==0.01 & pbc.df$Compression=="false" & pbc.df$Precision==4 & pbc.df$Protocol=="https"])
+
+my = c(dTH05T15, dTH05F15, dTH05T04, dTH05F04, dTH01T15, dTH01F15, dTH01T04, dTH01F04, dTS05T15, dTS05F15, dTS05T04, dTS05F04, dTS01T15,  
+    dTS01F15, dTS01T04, dTS01F04)
+mx = c(dPH05T15, dPH05F15, dPH05T04, dPH05F04, dPH01T15, dPH01F15, dPH01T04, dPH01F04, dPS05T15, dPS05F15, dPS05T04, dPS05F04, dPS01T15,  
+    dPS01F15, dPS01T04, dPS01F04)
+mlabs = c("H05T15", "H05F15", "H05T04", "H05F04", "H01T15", "H01F15", "H01T04", "H01F04", "S05T15", "S05F15", "S05T04", "S05F04", "S01T15",  
+    "S01F15", "S01T04", "S01F04") 
+
+plot(mx, my, ylab = "Time (s)", xlab = "Throughput (pts/s)", col="blue")
+title("Median Time vs Throughput", cex.main = 1,   font.main= 2, col.main= "blue")
+
+require(maptools)
+pointLabel(mx, my, labels = paste("  ", mlabs, "  ", sep=""), cex=0.7)
+
+
+#------------------------------------------------------------------------------------------------------------
 
 #
 # Definition of analytical functions
