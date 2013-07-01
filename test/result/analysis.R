@@ -334,24 +334,112 @@ t.test(pbcSel(pbc.df, 0.01, "true", 4, "https")$Time,
 
 #Generate histograms of Throughput and Time for each configuration, limited to less than 2 seconds.
 
-hist(dist(pbc22.df$PointsPerSec), breaks=100)
-hist(dist(pbc23.df$PointsPerSec), breaks=100)
-hist(dist(pbc24.df$PointsPerSec), breaks=100)
-hist(dist(pbc25.df$PointsPerSec), breaks=100)
-hist(dist(pbc26.df$PointsPerSec), breaks=100)
-hist(dist(pbc27.df$PointsPerSec), breaks=100)
-hist(dist(pbc28.df$PointsPerSec), breaks=100)
-hist(dist(pbc29.df$PointsPerSec), breaks=100)
+hist(pbc22.df$PointsPerSec, breaks=100)
+hist(pbc23.df$PointsPerSec, breaks=100)
+hist(pbc24.df$PointsPerSec, breaks=100)
+hist(pbc25.df$PointsPerSec, breaks=100)
+hist(pbc26.df$PointsPerSec, breaks=100)
+hist(pbc27.df$PointsPerSec, breaks=100)
+hist(pbc28.df$PointsPerSec, breaks=100)
+hist(pbc29.df$PointsPerSec, breaks=100)
 
-hist(dist(pbc22.df$Time), breaks=1000, xlim=c(0,2))
-hist(dist(pbc23.df$Time), breaks=1000, xlim=c(0,2))
-hist(dist(pbc24.df$Time), breaks=1000, xlim=c(0,2))
-hist(dist(pbc25.df$Time), breaks=1000, xlim=c(0,2))
-hist(dist(pbc26.df$Time), breaks=1000, xlim=c(0,2))
-hist(dist(pbc27.df$Time), breaks=1000, xlim=c(0,2))
-hist(dist(pbc28.df$Time), breaks=1000, xlim=c(0,2))
-hist(dist(pbc29.df$Time), breaks=1000, xlim=c(0,2))
+hist(subset(pbc22.df, Time<1.5)$Time, breaks=100)
+hist(subset(pbc23.df, Time<1.5)$Time, breaks=100)
+hist(subset(pbc24.df, Time<1.5)$Time, breaks=100)
+hist(subset(pbc25.df, Time<1.5)$Time, breaks=100)
+hist(subset(pbc26.df, Time<1.5)$Time, breaks=100)
+hist(subset(pbc27.df, Time<1.5)$Time, breaks=100)
+hist(subset(pbc28.df, Time<1.5)$Time, breaks=100)
+hist(subset(pbc29.df, Time<1.5)$Time, breaks=100)
 
+#
+#Size vs Time and Size vs Throughput distributions
+#
+
+
+
+plot(pbc14.df$Size, pbc14.df$Time, col="blue", pch=20, xlim=c(0,2500000), ylim=c(0, 9.5))
+plot(pbc15.df$Size, pbc15.df$Time, col="blue", pch=20, xlim=c(0,2500000), ylim=c(0, 9.5))
+plot(pbc16.df$Size, pbc16.df$Time, col="blue", pch=20, xlim=c(0,2500000), ylim=c(0, 9.5))
+plot(pbc17.df$Size, pbc17.df$Time, col="blue", pch=20, xlim=c(0,2500000), ylim=c(0, 9.5))
+plot(pbc18.df$Size, pbc18.df$Time, col="blue", pch=20, xlim=c(0,2500000), ylim=c(0, 9.5))
+plot(pbc19.df$Size, pbc19.df$Time, col="blue", pch=20, xlim=c(0,2500000), ylim=c(0, 9.5))
+plot(pbc20.df$Size, pbc20.df$Time, col="blue", pch=20, xlim=c(0,2500000), ylim=c(0, 9.5))
+plot(pbc21.df$Size, pbc21.df$Time, col="blue", pch=20, xlim=c(0,2500000), ylim=c(0, 9.5))
+plot(pbc22.df$Size, pbc22.df$Time, col="blue", pch=20, xlim=c(0,2500000), ylim=c(0, 9.5))
+plot(pbc23.df$Size, pbc23.df$Time, col="blue", pch=20, xlim=c(0,2500000), ylim=c(0, 9.5))
+plot(pbc24.df$Size, pbc24.df$Time, col="blue", pch=20, xlim=c(0,2500000), ylim=c(0, 9.5))
+plot(pbc25.df$Size, pbc25.df$Time, col="blue", pch=20, xlim=c(0,2500000), ylim=c(0, 9.5))
+plot(pbc26.df$Size, pbc26.df$Time, col="blue", pch=20, xlim=c(0,2500000), ylim=c(0, 9.5))
+plot(pbc27.df$Size, pbc27.df$Time, col="blue", pch=20, xlim=c(0,2500000), ylim=c(0, 9.5))
+plot(pbc28.df$Size, pbc28.df$Time, col="blue", pch=20, xlim=c(0,2500000), ylim=c(0, 9.5))
+plot(pbc29.df$Size, pbc29.df$Time, col="blue", pch=20, xlim=c(0,2500000), ylim=c(0, 9.5))
+
+plot(pbc14.df$Size, pbc14.df$PointsPerSec, col="blue", pch=20, xlim=c(0,2500000), ylim=c(0, 25500))
+plot(pbc15.df$Size, pbc15.df$PointsPerSec, col="blue", pch=20, xlim=c(0,2500000), ylim=c(0, 25500))
+plot(pbc16.df$Size, pbc16.df$PointsPerSec, col="blue", pch=20, xlim=c(0,2500000), ylim=c(0, 25500))
+plot(pbc17.df$Size, pbc17.df$PointsPerSec, col="blue", pch=20, xlim=c(0,2500000), ylim=c(0, 25500))
+plot(pbc18.df$Size, pbc18.df$PointsPerSec, col="blue", pch=20, xlim=c(0,2500000), ylim=c(0, 25500))
+plot(pbc19.df$Size, pbc19.df$PointsPerSec, col="blue", pch=20, xlim=c(0,2500000), ylim=c(0, 25500))
+plot(pbc20.df$Size, pbc20.df$PointsPerSec, col="blue", pch=20, xlim=c(0,2500000), ylim=c(0, 25500))
+plot(pbc21.df$Size, pbc21.df$PointsPerSec, col="blue", pch=20, xlim=c(0,2500000), ylim=c(0, 25500))
+plot(pbc22.df$Size, pbc22.df$PointsPerSec, col="blue", pch=20, xlim=c(0,2500000), ylim=c(0, 25500))
+plot(pbc23.df$Size, pbc23.df$PointsPerSec, col="blue", pch=20, xlim=c(0,2500000), ylim=c(0, 25500))
+plot(pbc24.df$Size, pbc24.df$PointsPerSec, col="blue", pch=20, xlim=c(0,2500000), ylim=c(0, 25500))
+plot(pbc25.df$Size, pbc25.df$PointsPerSec, col="blue", pch=20, xlim=c(0,2500000), ylim=c(0, 25500))
+plot(pbc26.df$Size, pbc26.df$PointsPerSec, col="blue", pch=20, xlim=c(0,2500000), ylim=c(0, 25500))
+plot(pbc27.df$Size, pbc27.df$PointsPerSec, col="blue", pch=20, xlim=c(0,2500000), ylim=c(0, 25500))
+plot(pbc28.df$Size, pbc28.df$PointsPerSec, col="blue", pch=20, xlim=c(0,2500000), ylim=c(0, 25500))
+plot(pbc29.df$Size, pbc29.df$PointsPerSec, col="blue", pch=20, xlim=c(0,2500000), ylim=c(0, 25500))
+
+
+#Plots of Point vs Size in Http and Https
+
+pbch.df<-rbind(pbc22.df, pbc23.df, pbc24.df, pbc25.df, pbc26.df, pbc27.df, pbc28.df, pbc29.df)
+pbcs.df<-rbind(pbc14.df, pbc15.df, pbc16.df, pbc17.df, pbc18.df, pbc19.df, pbc20.df, pbc21.df)
+
+plot(pbch.df$Points, pbch.df$Size, col="blue", pch=20, xlim=c(0,32500), ylim=c(0, 1100000))
+plot(pbcs.df$Points, pbcs.df$Size, col="blue", pch=20, xlim=c(0,32500), ylim=c(0, 1100000))
+
+
+#
+#Plots of Points and Sizes in Http vs Https
+#
+
+
+plot((
+          pbc.df$Points[pbc.df$Generalization==0.05 & pbc.df$Compression=="true" & pbc.df$Precision==15 & pbc.df
+                  $Protocol=="http"]), 
+    (pbc.df$Points[pbc.df$Generalization==0.05 & pbc.df$Compression=="true" & pbc.df$Precision==15 & pbc.df
+                  $Protocol=="https"]), col="blue", pch=20, xlim=c(0,20000), ylim=c(0,20000), 
+    ylab = "Http Points", xlab = "Https Points")
+
+
+plot((
+          pbc.df$Size[pbc.df$Generalization==0.05 & pbc.df$Compression=="true" & pbc.df$Precision==15 & pbc.df		                $Protocol=="http"]), 
+    (pbc.df$Size[pbc.df$Generalization==0.05 & pbc.df$Compression=="true" & pbc.df$Precision==15 & pbc.df                  	$Protocol=="https"]), col="blue", pch=20, xlim=c(0,1200000), ylim=c(0,1200000), 
+    ylab = "Http Size", xlab = "Https Size")
+
+
+
+#Comparison between Size vs Time in Http and Https configurations
+plot(pbc14.df$Size, pbc14.df$Time, col="blue", pch=20, xlim=c(0,620000), ylim=c(0,2.5), 
+    ylab = "Time", xlab = "Size")
+title("0.05, false, 15, Https", cex.main = 1,   font.main= 2, col.main= "blue")
+
+plot(pbc22.df$Size, pbc22.df$Time, col="blue", pch=20, xlim=c(0,620000), ylim=c(0,2.5), 
+    ylab = "Time", xlab = "Size")
+title("0.05, false, 15, Http", cex.main = 1,   font.main= 2, col.main= "blue")
+
+
+
+plot(pbc20.df$Size, pbc20.df$Time, col="blue", pch=20, xlim=c(0,620000), ylim=c(0,2.5), 
+    ylab = "Time", xlab = "Size")
+title("0.01, true, 4, Https", cex.main = 1,   font.main= 2, col.main= "blue")
+
+plot(pbc29.df$Size, pbc29.df$Time, col="blue", pch=20, xlim=c(0,620000), ylim=c(0,2.5), 
+    ylab = "Time", xlab = "Size")
+title("0.01, true, 4, Http", cex.main = 1,   font.main= 2, col.main= "blue")
 
 #
 # Definition of analytical functions
