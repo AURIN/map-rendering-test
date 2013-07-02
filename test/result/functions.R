@@ -64,7 +64,7 @@ pbc.load<-function() {
   pbc.df$Compression<-as.factor(pbc.df$Compression)
   pbc.df$Protocol<-as.factor(pbc.df$Protocol)
   
-  rbind(pbc.df, pbch.df)
+  pbc.df
 }
 
 #
@@ -94,15 +94,14 @@ compMeanPPS<-function(df, gen, comp, prec, prot) {
 # Definition of analytical functions
 #
 pbcLm<-function (df, models) {
-  par(mfrow = c(2, 3))
+  par(mfrow = c(2, 2))
   lapply(models, function(mod) {
         mod$lm<-lm(mod$mod, df)
-        plot(df[,mod$x], df[,mod$y], col="green", pch=20, main=mod$title, xlab="")
-        points(df[,mod$x], fitted(mod$lm), col="black", pch=20, xlab="")
+#        plot(df[,mod$x], df[,mod$y], col="green", pch=20, main=mod$title, xlab="")
+#        points(df[,mod$x], fitted(mod$lm), col="black", pch=20, xlab="")
         print(cat("---------------", mod$title, "---------------"))
         plot(mod$lm, main=mod$title)
         print(summary(mod$lm))
         "OK"
       })
 }
-

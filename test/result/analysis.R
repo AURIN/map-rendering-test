@@ -12,25 +12,45 @@ pbc.df<-pbc.load()
 xtabs(~Precision+Generalization+Compression+Protocol, pbc.df)
 
 #
-# Analysis of correlation between time and, size, points and geometries
+# Model definitions
+#
+pbcPoGe <-list("mod"=Npoints~Ngeoms, "x"="Npoints", "y"="Ngeoms", title="Npoints(Ngeoms)")
+pbcPoSz <-list("mod"=Npoints~Size, "x"="Npoints", "y"="Size", title="Npoints(Size)")
+pbcTiSzCom <-list("mod"=Time~Size+Compression, "x"="Size", "y"="Time", title="Time(Size+Compression)")
+pbcTiPoCom <-list("mod"=Time~Npoints+Compression, "x"="Npoints" , "y"="Time", title="Time(Npoints+Compression)")
+pbcTiGeCom <-list("mod"=Time~Ngeoms+Compression, "x"="Ngeoms", "y"="Time", title="Time(Ngeoms+Compression)")
+pbcTiSzGen <-list("mod"=Time~Size+Generalization, "x"="Size", "y"="Generalization", title="Time(Size+Generalization)")
+pbcTiPoGen <-list("mod"=Time~Npoints+Generalization, "x"="Npoints" , "y"="Generalization", title="Time(Npoints+Generalization)")
+pbcTiGeGen <-list("mod"=Time~Ngeoms+Generalization, "x"="Ngeoms", "y"="Generalization", title="Time(Ngeoms+Generalization)")
+pbcTrTi <-list("mod"=PointsPerSec~Time, "x"="PointsPerSec", "y"="Time", title="PointsPerSec(Time)")
+pbcTrSz <-list("mod"=PointsPerSec~Size, "x"="PointsPerSec", "y"="Size", title="PointsPerSec(Size)")
+pbcTrSzGen <-list("mod"=PointsPerSec~Size+Generalization, "x"="Size", "y"="Throughput", title="Throughput(Size+Generalization)")
+pbcTrPoGen <-list("mod"=PointsPerSec~Npoints+Generalization, "x"="Npoints" , "y"="Throughput", title="Throughput(Npoints+Generalization)")
+pbcTrGeGen <-list("mod"=PointsPerSec~Ngeoms+Generalization, "x"="Ngeoms", "y"="Throughput", title="Throughput(Ngeoms+Generalization)")
+
+#
+# Liniear models analysis 
+# NOTE: run them one by one ! 
 #
 
-pbcTiSz <-list("mod"=Time~Size, "x"="Size", "y"="Time", title="Time(Size)")
-pbcTiPo <-list("mod"=Time~Npoints, "x"="Npoints" , "y"="Time", title="Time(Npoints)")
-pbcTiGe <-list("mod"=Time~Ngeoms, "x"="Ngeoms", "y"="Time", title="Time(Ngeoms)")
-pbcGePo <-list("mod"=Ngeoms~Npoints, "x"="Npoints", "y"="Ngeoms", title="Ngeoms(Npoints)")
+pbcLm(pbc.df, list(pbcPoGe))
+pbcLm(pbc.df, list(pbcPoSz))
 
-pbcTiSzPre <-list("mod"=Time~Size+Precision, "x"="Size", "y"="Time", title="Time(Size+Precision)")
-pbcTiPoPre <-list("mod"=Time~Npoints+Precision, "x"="Npoints" , "y"="Time", title="Time(Npoints+Precision)")
-pbcTiGePre <-list("mod"=Time~Ngeoms+Precision, "x"="Ngeoms", "y"="Time", title="Time(Ngeoms+Precision)")
+pbcLm(pbc.df, list(pbcTiSzCom))
+pbcLm(pbc.df, list(pbcTiPoCom))
+pbcLm(pbc.df, list(pbcTiGeCom))
 
-pbcLm(pbc.df, list(pbcTiSz))
-pbcLm(pbc.df, list(pbcTiPo))
-pbcLm(pbc.df, list(pbcTiGe))
+pbcLm(pbc.df, list(pbcTiSzGen))
+pbcLm(pbc.df, list(pbcTiPoGen))
+pbcLm(pbc.df, list(pbcTiGeGen))
 
-pbcLm(pbc.df, list(pbcTiSzPre))
-pbcLm(pbc.df, list(pbcTiPoPre))
-pbcLm(pbc.df, list(pbcTiGePre))
+pbcLm(pbc.df, list(pbcTrTi))
+
+pbcLm(pbc.df, list(pbcTrSz))
+
+pbcLm(pbc.df, list(pbcTrSzGen))
+pbcLm(pbc.df, list(pbcTrPoGen))
+pbcLm(pbc.df, list(pbcTrGeGen))
 
 #
 # Computes means of Throughput and Time
