@@ -4,6 +4,8 @@
  * Server part of map-rendering-test application
  */
 
+var nReq = 0;
+
 /*
  * Reads settings
  */
@@ -99,21 +101,7 @@ function startServer(props) {
 	 * CouchDB query 
 	 */
 	app.get(/\/couchdb(.+)/, function(req, res) {
-
-		var view = "pbcPolygon", list = "geojson";
-
-		if (req.params[0] === "bbox") {
-			view = "pbcExtent"
-		}
-		if (req.params[0] === "string") {
-			view = "pbcPolygonString";
-			list = "geojsonString";
-		}
-		if (req.params[0] === "key") {
-			view = "pbcPolygon" + req.param("genlevel", "0.05");
-			list = "geojsonKey";
-		}
-
+		var view = "pbcPolygon" + req.param("genlevel", "0.05"), list = "geojson";
 		console.log("-- CouchDB request: /" + $("couchdb.db")
 				+ "/_design/geoinfo/_spatial/_list/" + list + "/" + view + "?bbox="
 				+ req.param("bbox", "0,0,0,0") + "&featuretype="
@@ -125,8 +113,7 @@ function startServer(props) {
 			genlevel : req.param("genlevel", "0.05")
 		}, function(err, result) {
 			if (err) {
-				console.log("View datastore/datasets error: "
-						+ JSON.stringify(err.message));
+				console.log("Error: " + err.message);
 				res.end(err.message);
 			} else {
 				sendData(req, res, result);
@@ -135,12 +122,14 @@ function startServer(props) {
 	});
 
 	/*
-	 * PostGIS query 
+	 * PostGIS query in GeoJSON 
 	 */
 	app
 			.get(
 					/\/pg\/(.+)/,
 					function(req, res) {
+
+						nReq++;
 
 						var config = {
 							user : $("pg.user"),
@@ -149,7 +138,7 @@ function startServer(props) {
 							database : $("pg.db"),
 							port : $("pg.port")
 						};
-
+						console.log("XXX " + req.url);
 						pg
 								.connect(
 										config,
@@ -203,6 +192,24 @@ function startServer(props) {
 																	}
 																}
 																jsonOutput += ']}';
+
+																require("fs").writeFile(
+																		"./data/" + nReq + ".json",
+																		jsonOutput,
+																		function(err) {
+																			if (err) {
+																				console.log(err);
+																			} else {
+																				require("child_process").exec("topojson " + "./data/" + nReq
+																						+ ".json" + " -o " + "./data/"
+																						+ nReq + ".tjson", function(err,
+																						stdout, stderr) {
+																					if (err) {
+																						console.log(err);
+																					}
+																				});
+																			}
+																		});
 																sendData(req, res, jsonOutput);
 															});
 										});

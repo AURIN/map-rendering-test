@@ -8,7 +8,7 @@ Test-bed to run rendering performance tests.
 If on dev-api.aurin.org.au, change dir to `/opt`.
 
 Install the package:
-`npm install git+https://<your github user>@github.com/AURIN/map-rendering-test.git#<version>"`
+`npm install git+ssh://git@github.com/AURIN/map-rendering-test.git#<version>"`
 
 Move the package's from the `node_modules` dir
 `mv node_modules/map-rendering-test/ .`

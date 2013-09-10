@@ -3,6 +3,13 @@
 #
 
 #
+# Plots GeoJSON vs TopoJSON size
+#
+setwd("/usr/var/projects/aurin/git/map-rendering-test/test/result")   
+jt.df<-read.table("json-vs-tjson.csv",header=T, sep=",")
+
+
+#
 # Plots mean time and throughput against: Precision, Generalization, Compression and Protocol
 #
 mTH05T15<-mean(pbc.df$Time[pbc.df$Generalization==0.05 & pbc.df$Compression=="true" & pbc.df$Precision==15 & pbc.df$Protocol=="http"])

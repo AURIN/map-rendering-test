@@ -135,13 +135,13 @@ function log(args) {
 }
 
 function buildRequestUrl(type, data, gen) {
-	if (type === "pg") {
+	if (type === "pg" || type === "tj") {
 		var table = pgTables[data].ungeneralized;
 		if (gen !== 0) {
 			table = pgTables[data].generalized
 					+ String(gen).replace(".", "_").replace(" ", "");
 		}
-		return "pg/" + table;
+		return type + "/" + table;
 	} else {
 		return type;
 	}
@@ -214,11 +214,8 @@ function createForm() {
 												id : "requestType",
 												fieldLabel : "Request",
 												store : new Ext.data.SimpleStore({
-													data : [ [ "pg", "PostGIS" ],
-															[ "couchdbexact", "CouchDB exact index" ],
-															[ "couchdbbbox", "CouchDB bbox index" ],
-															[ "couchdbstring", "CouchDB with string" ],
-															[ "couchdbkey", "CouchDB exact key index" ] ],
+													data : [ [ "pg", "PostGIS" ], [ "tj", "TopoJSON" ],
+															[ "couchdbexact", "CouchDB exact index" ] ],
 													fields : [ "value", "text" ]
 												}),
 												valueField : "value",
@@ -249,12 +246,6 @@ function createForm() {
 												fieldLabel : "Data",
 												store : new Ext.data.SimpleStore({
 													data : [ [ "no", "No feature" ], [ "pbc", "PBC" ] ],
-													/*																	
-																														data : [ [ "no", "No feature" ],
-																																			[ "ste", "STE" ], [ "lga", "LGA" ],
-																																			[ "pbc", "PBC" ], [ "sd", "SD" ],
-																																			[ "sla", "SLA" ], [ "cd", "CD" ] ],
-													*/
 													fields : [ "value", "text" ]
 												}),
 												valueField : "value",

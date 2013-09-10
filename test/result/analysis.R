@@ -7,9 +7,15 @@ source("functions.R")
 pbc.df<-pbc.load()
 
 #
+# Add a derived variable
+#
+pbc.df$SizePerGeom<-(pbc.df$Size / pbc.df$Ngeoms)
+
+#
 # xtab to check that every combination of values have been tested
 #
 xtabs(~Precision+Generalization+Compression+Protocol, pbc.df)
+
 
 #
 # Model definitions
@@ -27,6 +33,9 @@ pbcTrSz <-list("mod"=PointsPerSec~Size, "x"="PointsPerSec", "y"="Size", title="P
 pbcTrSzGen <-list("mod"=PointsPerSec~Size+Generalization, "x"="Size", "y"="Throughput", title="Throughput(Size+Generalization)")
 pbcTrPoGen <-list("mod"=PointsPerSec~Npoints+Generalization, "x"="Npoints" , "y"="Throughput", title="Throughput(Npoints+Generalization)")
 pbcTrGeGen <-list("mod"=PointsPerSec~Ngeoms+Generalization, "x"="Ngeoms", "y"="Throughput", title="Throughput(Ngeoms+Generalization)")
+
+pbcSizePoFeGenComp <-list("mod"=Size~Ngeoms+Npoints+Generalization+Compression, "x"="Ngeoms", "y"="Size", title="Size(Ngeoms+Npoints+Generalization+Compression)")
+pbcSizePoFeComp<-list("mod"=Size~Ngeoms+Npoints+Compression, "x"="Ngeoms", "y"="Size", title="Size(Ngeoms+Npoints+Compression)")
 
 #
 # Liniear models analysis 
@@ -228,3 +237,31 @@ lapply(list(
       by(e$df$PointsPerSec, e$df$Precision, summary)
     })
 
+# 
+# Json vs TJson
+#
+jt.df<-read.table("json-vs-tjson.csv",header=T, sep=",")
+plot(jt.df$jsize, jt.df$tsize)
+
+#
+# Bytes per geoms based on Precision and Generalization
+#
+mod<-aov((Size/Ngeoms)~Generalization*Precision, pbc.df)
+summary(mod)
+print(model.tables(mod, "means"), digits=3)
+
+#
+# Points per sec based on Size per point
+#
+mod<-lm(PointsPerSec~SizePerGeom, pbc.df)
+summary(mod)
+plot(pbc.df$SizePerGeom, pbc.df$PointsPerSec)
+lines(mod$fitted, col="blue")
+
+#
+# Points per sec by Compression, Protocol and SizePerGeom
+#
+mod<-lm(PointsPerSec~Compression*Protocol+SizePerGeom, pbc.df)
+summary(mod)
+plot(pbc.df$SizePerGeom, pbc.df$PointsPerSec)
+lines(mod$fitted, col="blue")
