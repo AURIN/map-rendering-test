@@ -22,10 +22,34 @@ xtabs(~Precision+Generalization+Compression+Protocol, pbc.df)
 #
 # Points per sec by Compression, Protocol and SizePerGeom
 #
-mod<-lm(PointsPerSec~Compression*Protocol+SizePerPoint, pbc.df)
+df1<-subset(pbc.df, Compression == "true" & Protocol == "http")
+df2<-subset(pbc.df, Compression == "false" & Protocol == "http")
+df3<-subset(pbc.df, Compression == "true" & Protocol == "https")
+df4<-subset(pbc.df, Compression == "false" & Protocol == "https")
+
+modPoint<-lm(PointsPerSec~Compression*Protocol+SizePerPoint, pbc.df)
+summary(modPoint)
+
+plot(pbc.df$SizePerPoint, pbc.df$PointsPerSec, ylim=c(0, 12000), cex=0.2)
+points(df2$SizePerPoint, predict(modPoint, df2), col="blue", cex=0.2)
+points(df4$SizePerPoint, predict(modPoint, df4), col="darkviolet", cex=0.2)
+points(df1$SizePerPoint, predict(modPoint, df1), col="red", cex=0.2)
+points(df3$SizePerPoint, predict(modPoint, df3), col="darkgreen", cex=0.2)
+
+text(33, 2300, "Compression: false, Protocol: http", col="blue")
+text(33, 1800, "Compression: false, Protocol: https", col="darkviolet")
+text(33, 1100, "Compression: true, Protocol: http", col="red")
+text(33, 500, "Compression: true, Protocol: https", col="darkgreen")
+
+mod<-lm(PointsPerSec~Compression*Protocol+SizePerGeom, pbc.df)
 summary(mod)
 plot(pbc.df$SizePerPoint, pbc.df$PointsPerSec)
-lines(mod$fitted.values, col="blue")
+points(pbc.df$SizePerPoint, predict(mod), col="blue")
+
+plot(df1$SizePerPoint, df1$PointsPerSec)
+points(df1$SizePerPoint, predict(mod), col="blue")
+
+#points(df$SizePerGeom, mod$fitted, col="blue")
 
 # }
 # NOTE: Phil. to here:
