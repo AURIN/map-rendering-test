@@ -2,20 +2,33 @@
 # analysis.R
 #
 
+# NOTE: Phil. start running the cript from here
+# {
+
+#
+# Loads, cleans and defines a new variable 
+#
 setwd("/usr/var/projects/aurin/git/map-rendering-test/test/result")   
 source("functions.R")
 pbc.df<-pbc.load()
-
-#
-# Add a derived variable
-#
 pbc.df$SizePerGeom<-(pbc.df$Size / pbc.df$Ngeoms)
+pbc.df$SizePerPoint<-(pbc.df$Size / pbc.df$Npoints)
 
 #
 # xtab to check that every combination of values have been tested
 #
 xtabs(~Precision+Generalization+Compression+Protocol, pbc.df)
 
+#
+# Points per sec by Compression, Protocol and SizePerGeom
+#
+mod<-lm(PointsPerSec~Compression*Protocol+SizePerPoint, pbc.df)
+summary(mod)
+plot(pbc.df$SizePerPoint, pbc.df$PointsPerSec)
+lines(mod$fitted.values, col="blue")
+
+# }
+# NOTE: Phil. to here:
 
 #
 # Model definitions
@@ -261,7 +274,29 @@ lines(mod$fitted, col="blue")
 #
 # Points per sec by Compression, Protocol and SizePerGeom
 #
-mod<-lm(PointsPerSec~Compression*Protocol+SizePerGeom, pbc.df)
+mod<-lm(PointsPerSec~Compression*Protocol+SizePerPoint, pbc.df)
 summary(mod)
-plot(pbc.df$SizePerGeom, pbc.df$PointsPerSec)
-lines(mod$fitted, col="blue")
+plot(pbc.df$SizePerPoint, pbc.df$PointsPerSec)
+lines(mod$fitted.values, col="blue")
+
+df<-subset(pbc.df, Compression == "true" & Protocol == "http")
+mod<-lm(PointsPerSec~SizePerGeom, df)
+summary(mod)
+plot(df$SizePerGeom, df$PointsPerSec)
+lines(mod$fitted.values, col="blue")
+
+df<-subset(pbc.df, Compression == "false" & Protocol == "http")
+mod<-lm(PointsPerSec~SizePerGeom, df)
+summary(mod)
+lines(mod$fitted.values, col="green")
+
+df<-subset(pbc.df, Compression == "false" & Protocol == "https")
+mod<-lm(PointsPerSec~SizePerGeom, df)
+summary(mod)
+lines(mod$fitted.values, col="red")
+
+df<-subset(pbc.df, Compression == "true" & Protocol == "https")
+mod<-lm(PointsPerSec~SizePerGeom, df)
+summary(mod)
+lines(mod$fitted.values, col="yellow")
+
