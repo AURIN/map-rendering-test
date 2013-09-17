@@ -2,277 +2,17 @@
 # analysis.R
 #
 
-# NOTE: Phil. start running the cript from here
-# {
-
 #
-# Loads, cleans and defines a new variable 
+# Loads, cleans and defines variables 
 #
 setwd("/usr/var/projects/aurin/git/map-rendering-test/test/result")   
 source("functions.R")
 pbc.df<-pbc.load()
-pbc.df$SizePerGeom<-(pbc.df$Size / pbc.df$Ngeoms)
-pbc.df$SizePerPoint<-(pbc.df$Size / pbc.df$Npoints)
 
 #
 # xtab to check that every combination of values have been tested
 #
 xtabs(~Precision+Generalization+Compression+Protocol, pbc.df)
-
-#
-# Points per sec by Compression, Protocol and SizePerGeom
-#
-df1<-subset(pbc.df, Compression == "true" & Protocol == "http")
-df2<-subset(pbc.df, Compression == "false" & Protocol == "http")
-df3<-subset(pbc.df, Compression == "true" & Protocol == "https")
-df4<-subset(pbc.df, Compression == "false" & Protocol == "https")
-
-modPoint<-lm(PointsPerSec~Compression*Protocol+SizePerPoint, pbc.df)
-summary(modPoint)
-
-plot(pbc.df$SizePerPoint, pbc.df$PointsPerSec, ylim=c(0, 12000), cex=0.2)
-points(df2$SizePerPoint, predict(modPoint, df2), col="blue", cex=0.2)
-points(df4$SizePerPoint, predict(modPoint, df4), col="darkviolet", cex=0.2)
-points(df1$SizePerPoint, predict(modPoint, df1), col="red", cex=0.2)
-points(df3$SizePerPoint, predict(modPoint, df3), col="darkgreen", cex=0.2)
-
-text(33, 2300, "Compression: false, Protocol: http", col="blue")
-text(33, 1800, "Compression: false, Protocol: https", col="darkviolet")
-text(33, 1100, "Compression: true, Protocol: http", col="red")
-text(33, 500, "Compression: true, Protocol: https", col="darkgreen")
-
-mod<-lm(PointsPerSec~Compression*Protocol+SizePerGeom, pbc.df)
-summary(mod)
-plot(pbc.df$SizePerPoint, pbc.df$PointsPerSec)
-points(pbc.df$SizePerPoint, predict(mod), col="blue")
-
-plot(df1$SizePerPoint, df1$PointsPerSec)
-points(df1$SizePerPoint, predict(mod), col="blue")
-
-#points(df$SizePerGeom, mod$fitted, col="blue")
-
-# }
-# NOTE: Phil. to here:
-
-#
-# Model definitions
-#
-pbcPoGe <-list("mod"=Npoints~Ngeoms, "x"="Npoints", "y"="Ngeoms", title="Npoints(Ngeoms)")
-pbcPoSz <-list("mod"=Npoints~Size, "x"="Npoints", "y"="Size", title="Npoints(Size)")
-pbcTiSzCom <-list("mod"=Time~Size+Compression, "x"="Size", "y"="Time", title="Time(Size+Compression)")
-pbcTiPoCom <-list("mod"=Time~Npoints+Compression, "x"="Npoints" , "y"="Time", title="Time(Npoints+Compression)")
-pbcTiGeCom <-list("mod"=Time~Ngeoms+Compression, "x"="Ngeoms", "y"="Time", title="Time(Ngeoms+Compression)")
-pbcTiSzGen <-list("mod"=Time~Size+Generalization, "x"="Size", "y"="Generalization", title="Time(Size+Generalization)")
-pbcTiPoGen <-list("mod"=Time~Npoints+Generalization, "x"="Npoints" , "y"="Generalization", title="Time(Npoints+Generalization)")
-pbcTiGeGen <-list("mod"=Time~Ngeoms+Generalization, "x"="Ngeoms", "y"="Generalization", title="Time(Ngeoms+Generalization)")
-pbcTrTi <-list("mod"=PointsPerSec~Time, "x"="PointsPerSec", "y"="Time", title="PointsPerSec(Time)")
-pbcTrSz <-list("mod"=PointsPerSec~Size, "x"="PointsPerSec", "y"="Size", title="PointsPerSec(Size)")
-pbcTrSzGen <-list("mod"=PointsPerSec~Size+Generalization, "x"="Size", "y"="Throughput", title="Throughput(Size+Generalization)")
-pbcTrPoGen <-list("mod"=PointsPerSec~Npoints+Generalization, "x"="Npoints" , "y"="Throughput", title="Throughput(Npoints+Generalization)")
-pbcTrGeGen <-list("mod"=PointsPerSec~Ngeoms+Generalization, "x"="Ngeoms", "y"="Throughput", title="Throughput(Ngeoms+Generalization)")
-
-pbcSizePoFeGenComp <-list("mod"=Size~Ngeoms+Npoints+Generalization+Compression, "x"="Ngeoms", "y"="Size", title="Size(Ngeoms+Npoints+Generalization+Compression)")
-pbcSizePoFeComp<-list("mod"=Size~Ngeoms+Npoints+Compression, "x"="Ngeoms", "y"="Size", title="Size(Ngeoms+Npoints+Compression)")
-
-#
-# Liniear models analysis 
-# NOTE: run them one by one ! 
-#
-
-pbcLm(pbc.df, list(pbcPoGe))
-pbcLm(pbc.df, list(pbcPoSz))
-
-pbcLm(pbc.df, list(pbcTiSzCom))
-pbcLm(pbc.df, list(pbcTiPoCom))
-pbcLm(pbc.df, list(pbcTiGeCom))
-
-pbcLm(pbc.df, list(pbcTiSzGen))
-pbcLm(pbc.df, list(pbcTiPoGen))
-pbcLm(pbc.df, list(pbcTiGeGen))
-
-pbcLm(pbc.df, list(pbcTrTi))
-
-pbcLm(pbc.df, list(pbcTrSz))
-
-pbcLm(pbc.df, list(pbcTrSzGen))
-pbcLm(pbc.df, list(pbcTrPoGen))
-pbcLm(pbc.df, list(pbcTrGeGen))
-
-#
-# Computes means of Throughput and Time
-#
-pbc.mtih<-rbind(
-    compMeanTime(pbc.df, 0.05, "true", 15, "http"),
-    compMeanTime(pbc.df, 0.05, "true", 4, "http"),
-    compMeanTime(pbc.df, 0.05, "false", 15, "http"),
-    compMeanTime(pbc.df, 0.05, "false", 4, "http"),
-    compMeanTime(pbc.df, 0.01, "true", 15, "http"),
-    compMeanTime(pbc.df, 0.01, "true", 4, "http"),
-    compMeanTime(pbc.df, 0.01, "false", 15, "http"),
-    compMeanTime(pbc.df, 0.01, "false", 4, "http")
-)
-
-pbc.mtis<-rbind(
-    compMeanTime(pbc.df, 0.05, "true", 15, "https"),
-    compMeanTime(pbc.df, 0.05, "true", 4, "https"),
-    compMeanTime(pbc.df, 0.05, "false", 15, "https"),
-    compMeanTime(pbc.df, 0.05, "false", 4, "https"),
-    compMeanTime(pbc.df, 0.01, "true", 15, "https"),
-    compMeanTime(pbc.df, 0.01, "true", 4, "https"),
-    compMeanTime(pbc.df, 0.01, "false", 15, "https"),
-    compMeanTime(pbc.df, 0.01, "false", 4, "https")
-)
-
-pbc.mppsh<-rbind(
-    compMeanPPS(pbc.df, 0.05, "true", 15, "http"),
-    compMeanPPS(pbc.df, 0.05, "true", 4, "http"),
-    compMeanPPS(pbc.df, 0.05, "false", 15, "http"),
-    compMeanPPS(pbc.df, 0.05, "false", 4, "http"),
-    compMeanPPS(pbc.df, 0.01, "true", 15, "http"),
-    compMeanPPS(pbc.df, 0.01, "true", 4, "http"),
-    compMeanPPS(pbc.df, 0.01, "false", 15, "http"),
-    compMeanPPS(pbc.df, 0.01, "false", 4, "http")
-)
-
-pbc.mppss<-rbind(
-    compMeanPPS(pbc.df, 0.05, "true", 15, "https"),
-    compMeanPPS(pbc.df, 0.05, "true", 4, "https"),
-    compMeanPPS(pbc.df, 0.05, "false", 15, "https"),
-    compMeanPPS(pbc.df, 0.05, "false", 4, "https"),
-    compMeanPPS(pbc.df, 0.01, "true", 15, "https"),
-    compMeanPPS(pbc.df, 0.01, "true", 4, "https"),
-    compMeanPPS(pbc.df, 0.01, "false", 15, "https"),
-    compMeanPPS(pbc.df, 0.01, "false", 4, "https")
-)
-
-#
-# Plots Time vs Throughput
-#
-plot(pbc.mppsh[,2], pbc.mtih[,2], ylab = "Time (s)", xlab = "Throughput (pts/s)", col="blue",
-    xlim=c(4000,11000), ylim=c(0.15, 0.7))
-pointLabel(pbc.mppsh[,2], pbc.mtih[,2], labels = paste("  ", pbc.mtih[,1], "  ", sep=""), cex=0.7)
-
-points(pbc.mppss[,2], pbc.mtis[,2], col="red")
-pointLabel(pbc.mppss[,2], pbc.mtis[,2], labels = paste("  ", pbc.mtis[,1], "  ", sep=""), cex=0.7)
-
-title("Mean Time vs Throughput", cex.main = 1,   font.main= 2)
-
-#
-# T-test Time means of different combination of factors
-#
-t.test(pbcSel(pbc.df, 0.01, "false", 15, "http")$Time, 
-    pbcSel(pbc.df, 0.01, "false", 15, "https")$Time)
-
-#
-# T-tests
-# Largest differences in mean Time
-#
-t.test(pbcSel(pbc.df, 0.01, "false", 15, "http")$Time, 
-    pbcSel(pbc.df, 0.01, "false", 15, "https")$Time)
-
-t.test(pbcSel(pbc.df, 0.01, "false", 4, "http")$Time, 
-    pbcSel(pbc.df, 0.01, "false", 4, "https")$Time)
-
-#
-# Largest differences in mean Throughput
-#
-t.test(pbcSel(pbc.df, 0.05, "true", 15, "http")$PointsPerSec, 
-    pbcSel(pbc.df, 0.05, "true", 15, "https")$PointsPerSec)
-
-t.test(pbcSel(pbc.df, 0.05, "true", 4, "http")$PointsPerSec, 
-    pbcSel(pbc.df, 0.05, "true", 4, "https")$PointsPerSec)
-
-#
-#T-test shows no significant difference between largest differences in time and largest difference in throughput, all results fall within the 95% confidence interval.
-#
-
-#
-# T-test for largest difference between generalization
-#
-t.test(pbcSel(pbc.df, 0.01, "false", 15, "https")$PointsPerSec, 
-    pbcSel(pbc.df, 0.05, "false", 15, "https")$PointsPerSec)
-
-t.test(pbcSel(pbc.df, 0.01, "false", 15, "https")$Time, 
-    pbcSel(pbc.df, 0.05, "false", 15, "https")$Time)
-
-t.test(pbcSel(pbc.df, 0.01, "true", 15, "https")$PointsPerSec, 
-    pbcSel(pbc.df, 0.05, "true", 15, "https")$PointsPerSec)
-
-t.test(pbcSel(pbc.df, 0.01, "true", 15, "https")$Time, 
-    pbcSel(pbc.df, 0.05, "true", 15, "https")$Time)
-
-t.test(pbcSel(pbc.df, 0.01, "true", 4, "https")$PointsPerSec, 
-    pbcSel(pbc.df, 0.05, "true", 4, "https")$PointsPerSec)
-
-t.test(pbcSel(pbc.df, 0.01, "true", 4, "https")$Time, 
-    pbcSel(pbc.df, 0.05, "true", 4, "https")$Time)
-
-#
-# Plots of Point vs Size in Http and Https
-#
-pbch.df<-rbind(pbc22.df, pbc23.df, pbc24.df, pbc25.df, pbc26.df, pbc27.df, pbc28.df, pbc29.df)
-pbcs.df<-rbind(pbc14.df, pbc15.df, pbc16.df, pbc17.df, pbc18.df, pbc19.df, pbc20.df, pbc21.df)
-
-plot(pbch.df$Points, pbch.df$Size, col="blue", pch=20, xlim=c(0,32500), ylim=c(0, 1100000))
-plot(pbcs.df$Points, pbcs.df$Size, col="blue", pch=20, xlim=c(0,32500), ylim=c(0, 1100000))
-
-#
-#Plots of Points and Sizes in Http vs Https
-#
-plot((
-          pbc.df$Points[pbc.df$Generalization==0.05 & pbc.df$Compression=="true" & pbc.df$Precision==15 & pbc.df
-                  $Protocol=="http"]), 
-    (pbc.df$Points[pbc.df$Generalization==0.05 & pbc.df$Compression=="true" & pbc.df$Precision==15 & pbc.df
-                  $Protocol=="https"]), col="blue", pch=20, xlim=c(0,20000), ylim=c(0,20000), 
-    ylab = "Http Points", xlab = "Https Points")
-
-
-plot((
-          pbc.df$Size[pbc.df$Generalization==0.05 & pbc.df$Compression=="true" & pbc.df$Precision==15 & pbc.df		                $Protocol=="http"]), 
-    (pbc.df$Size[pbc.df$Generalization==0.05 & pbc.df$Compression=="true" & pbc.df$Precision==15 & pbc.df                  	$Protocol=="https"]), col="blue", pch=20, xlim=c(0,1200000), ylim=c(0,1200000), 
-    ylab = "Http Size", xlab = "Https Size")
-
-#
-# Comparison between Size vs Time in Http and Https configurations
-#
-plot(pbc14.df$Size, pbc14.df$Time, col="blue", pch=20, xlim=c(0,620000), ylim=c(0,2.5), 
-    ylab = "Time", xlab = "Size")
-title("0.05, false, 15, Https", cex.main = 1,   font.main= 2, col.main= "blue")
-
-plot(pbc22.df$Size, pbc22.df$Time, col="blue", pch=20, xlim=c(0,620000), ylim=c(0,2.5), 
-    ylab = "Time", xlab = "Size")
-title("0.05, false, 15, Http", cex.main = 1,   font.main= 2, col.main= "blue")
-
-plot(pbc20.df$Size, pbc20.df$Time, col="blue", pch=20, xlim=c(0,620000), ylim=c(0,2.5), 
-    ylab = "Time", xlab = "Size")
-title("0.01, true, 4, Https", cex.main = 1,   font.main= 2, col.main= "blue")
-
-plot(pbc29.df$Size, pbc29.df$Time, col="blue", pch=20, xlim=c(0,620000), ylim=c(0,2.5), 
-    ylab = "Time", xlab = "Size")
-title("0.01, true, 4, Http", cex.main = 1,   font.main= 2, col.main= "blue")
-
-#
-# Data summaries
-#
-summary(pbc.df)
-by(pbc.df, pbc.df$Precision, summary)
-
-
-lapply(list(
-#        list(df=pbc.df, title="PBC"), 
-#        list(df=pbc04.df, title="PBC04"),
-#        list(df=pbc05.df, title="PBC05"),        
-#        list(df=pbc06.df, title="PBC06"),        
-#        list(df=pbc07.df, title="PBC07"),        
-#        list(df=pbc08.df, title="PBC08"),        
-#        list(df=pbc09.df, title="PBC09"),        
-#        list(df=pbc10.df, title="PBC10")        
-    ), function(e) {
-      sprintf("----------------------------------")
-      sprintf(e$title)
-#          by(e$df$Time, e$df$Precision, summary)
-      by(e$df$PointsPerSec, e$df$Precision, summary)
-    })
 
 # 
 # Json vs TJson
@@ -281,46 +21,77 @@ jt.df<-read.table("json-vs-tjson.csv",header=T, sep=",")
 plot(jt.df$jsize, jt.df$tsize)
 
 #
-# Bytes per geoms based on Precision and Generalization
+# Ngeoms by Size per geom
 #
-mod<-aov((Size/Ngeoms)~Generalization*Precision, pbc.df)
+plot(pbc.df$Ngeoms, pbc.df$SizePerGeom, cex=0.1, xlab="N of geometries", ylab="Size per geometry")
+
+df1<-subset(pbc.df, Generalization == "0.01" & Precision == 4)
+df2<-subset(pbc.df, Generalization == "0.05" & Precision == 4)
+df3<-subset(pbc.df, Generalization == "0.01" & Precision == 15)
+df4<-subset(pbc.df, Generalization == "0.05" & Precision == 15)
+
+par(mfrow=c(2,2))
+plot(df1$Ngeoms, df1$SizePerGeom, cex=0.1, col="darkgreen", ylim=c(0,2000), xlim=c(0,1000), main="Gen 0.01, Prec 4")
+plot(df2$Ngeoms, df2$SizePerGeom, cex=0.1, col="cyan", ylim=c(0,2000), xlim=c(0,1000), main="Gen 0.05, Prec 4")
+plot(df3$Ngeoms, df3$SizePerGeom, cex=0.1, col="red", ylim=c(0,2000), xlim=c(0,1000), main="Gen 0.01, Prec 15")
+plot(df4$Ngeoms, df4$SizePerGeom, cex=0.1, col="blue", ylim=c(0,2000), xlim=c(0,1000), main="Gen 0.05, Prec 15")
+
+#
+# Points per geom based on Generalization
+#
+mod<-aov(Npoints~Generalization, pbc.df)
 summary(mod)
 print(model.tables(mod, "means"), digits=3)
 
 #
-# Points per sec based on Size per point
+# Size per geom based on Precision and Generalization
 #
-mod<-lm(PointsPerSec~SizePerGeom, pbc.df)
+mod<-aov(SizePerGeom~Generalization*Precision, pbc.df)
 summary(mod)
-plot(pbc.df$SizePerGeom, pbc.df$PointsPerSec)
-lines(mod$fitted, col="blue")
+print(model.tables(mod, "means"), digits=3)
 
 #
-# Points per sec by Compression, Protocol and SizePerGeom
+# Size per point based on Precision and Generalization
 #
-mod<-lm(PointsPerSec~Compression*Protocol+SizePerPoint, pbc.df)
+mod<-aov(SizePerPoint~Generalization*Precision, pbc.df)
 summary(mod)
-plot(pbc.df$SizePerPoint, pbc.df$PointsPerSec)
-lines(mod$fitted.values, col="blue")
+print(model.tables(mod, "means"), digits=3)
 
-df<-subset(pbc.df, Compression == "true" & Protocol == "http")
-mod<-lm(PointsPerSec~SizePerGeom, df)
-summary(mod)
-plot(df$SizePerGeom, df$PointsPerSec)
-lines(mod$fitted.values, col="blue")
+#
+# Geoms per sec for compression, generazliazation and protocol 
+#
+modThr<-aov(GeomsPerSec~Generalization*Compression*Protocol+SizePerGeom, pbc.df)
+summary(modThr)
+print(model.tables(modThr, "means"), digits=3)
 
-df<-subset(pbc.df, Compression == "false" & Protocol == "http")
-mod<-lm(PointsPerSec~SizePerGeom, df)
-summary(mod)
-lines(mod$fitted.values, col="green")
+#
+# Geoms per sec by Compression, Protocol and SizePerGeom
+#
+df1<-subset(pbc.df, Compression == "true" & Protocol == "http")
+df2<-subset(pbc.df, Compression == "false" & Protocol == "http")
+df3<-subset(pbc.df, Compression == "true" & Protocol == "https")
+df4<-subset(pbc.df, Compression == "false" & Protocol == "https")
 
-df<-subset(pbc.df, Compression == "false" & Protocol == "https")
-mod<-lm(PointsPerSec~SizePerGeom, df)
-summary(mod)
-lines(mod$fitted.values, col="red")
+# Computes LM
+modGeom<-lm(GeomsPerSec~Compression*Protocol+SizePerGeom, pbc.df)
+summary(modGeom)
 
-df<-subset(pbc.df, Compression == "true" & Protocol == "https")
-mod<-lm(PointsPerSec~SizePerGeom, df)
-summary(mod)
-lines(mod$fitted.values, col="yellow")
+# Plots individual points by combination of factors
+par(mfrow=c(2,2))
+plot(df1$SizePerGeom, df1$GeomsPerSec, col="red", cex=0.2, ylim=c(0,2000), main="Compr, HTTP", xlab="Size per geom", ylab="Geoms per sec")
+points(df1$SizePerGeom, predict(modGeom, df1), cex=0.2)
+plot(df2$SizePerGeom, df2$GeomsPerSec, col="blue", cex=0.2, ylim=c(0,2000), main="NoCompr, HTTP", xlab="Size per geom", ylab="Geoms per sec")
+points(df2$SizePerGeom, predict(modGeom, df2),  cex=0.2)
+plot(df3$SizePerGeom, df3$GeomsPerSec, col="darkgreen", cex=0.2, ylim=c(0,2000), main="Compr, HTTPS", xlab="Size per geom", ylab="Geoms per sec")
+points(df3$SizePerGeom, predict(modGeom, df3), cex=0.2)
+plot(df4$SizePerGeom, df4$GeomsPerSec, col="darkviolet", cex=0.2, ylim=c(0,2000), main="NoCompr, HTTPS", xlab="Size per geom", ylab="Geoms per sec")
+points(df4$SizePerGeom, predict(modGeom, df4), cex=0.2)
+
+# Combinaes in one plot 
+par(mfrow=c(1,1))
+plot(pbc.df$SizePerGeom, pbc.df$GeomsPerSec, col="red", cex=0.2, ylim=c(0,2000), xlab="Size per geom", ylab="Geoms per sec")
+points(df1$SizePerGeom, predict(modGeom, df1), cex=0.2, col="red")
+points(df2$SizePerGeom, predict(modGeom, df2), cex=0.2, col="blue")
+points(df3$SizePerGeom, predict(modGeom, df3), cex=0.2, col="darkgreen")
+points(df4$SizePerGeom, predict(modGeom, df4), cex=0.2, col="darkviolet")
 

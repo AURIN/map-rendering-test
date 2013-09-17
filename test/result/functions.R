@@ -50,10 +50,10 @@ pbc.load<-function() {
   pbch.df<-rbind(pbc22.df, pbc23.df, pbc24.df, pbc25.df, pbc26.df, pbc27.df, pbc28.df, pbc29.df)
   
   # Data clean-up
-  pbc.df<-pbc.df[pbc.df$Npoints<25000,]
-  pbch.df<-pbch.df[pbch.df$Npoints<25000,]
-  pbc.df<-pbc.df[pbc.df$Time<10,]
-  pbch.df<-pbch.df[pbch.df$Time<10,]
+  pbc.df<-subset(pbc.df, Npoints < 25000 & Ngeoms < 400)
+  pbch.df<-subset(pbch.df, Npoints < 25000 & Ngeoms < 400)
+  pbc.df<-subset(pbc.df, Time < 10)
+  pbch.df<-subset(pbch.df, Time < 10)
   pbch.df$Protocol<-"http"
   pbc.df$Protocol<-"https"
   pbc.df<-rbind(pbc.df, pbch.df)
@@ -63,7 +63,12 @@ pbc.load<-function() {
   pbc.df$Generalization<-as.factor(pbc.df$Generalization)
   pbc.df$Compression<-as.factor(pbc.df$Compression)
   pbc.df$Protocol<-as.factor(pbc.df$Protocol)
-  
+
+  # Defines new variables
+  pbc.df$SizePerGeom<-(pbc.df$Size / pbc.df$Ngeoms)
+  pbc.df$GeomsPerSec<-(pbc.df$Ngeoms / pbc.df$Time) 
+  pbc.df$SizePerPoint<-(pbc.df$Size / pbc.df$Npoints)
+
   pbc.df
 }
 
