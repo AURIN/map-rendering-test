@@ -48,22 +48,22 @@ pbc.load<-function() {
   
   pbc.df<-rbind(pbc14.df, pbc15.df, pbc16.df, pbc17.df, pbc18.df, pbc19.df, pbc20.df, pbc21.df)
   pbch.df<-rbind(pbc22.df, pbc23.df, pbc24.df, pbc25.df, pbc26.df, pbc27.df, pbc28.df, pbc29.df)
-  
+
   # Data clean-up
-  pbc.df<-subset(pbc.df, Npoints < 25000 & Ngeoms < 400)
-  pbch.df<-subset(pbch.df, Npoints < 25000 & Ngeoms < 400)
-  pbc.df<-subset(pbc.df, Time < 10)
-  pbch.df<-subset(pbch.df, Time < 10)
+  print(sum(xtabs(~Compression+Precision, rbind(pbc.df, pbch.df))))
+  pbc.df<-subset(pbc.df, Npoints < 25000 & Ngeoms < 400 & Time < 4)
+  pbch.df<-subset(pbch.df, Npoints < 25000 & Ngeoms < 400 & Time < 4)
   pbch.df$Protocol<-"http"
   pbc.df$Protocol<-"https"
   pbc.df<-rbind(pbc.df, pbch.df)
+  print(sum(xtabs(~Compression+Precision, pbc.df)))
   
   # Recodification of variables as factors
   pbc.df$Precision<-as.factor(pbc.df$Precision) 
   pbc.df$Generalization<-as.factor(pbc.df$Generalization)
   pbc.df$Compression<-as.factor(pbc.df$Compression)
   pbc.df$Protocol<-as.factor(pbc.df$Protocol)
-
+  
   # Defines new variables
   pbc.df$SizePerGeom<-(pbc.df$Size / pbc.df$Ngeoms)
   pbc.df$GeomsPerSec<-(pbc.df$Ngeoms / pbc.df$Time) 

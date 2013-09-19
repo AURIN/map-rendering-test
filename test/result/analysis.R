@@ -14,6 +14,23 @@ pbc.df<-pbc.load()
 #
 xtabs(~Precision+Generalization+Compression+Protocol, pbc.df)
 
+#
+# Distributtion graphs
+par(mfrow=c(2,2))
+png(file="/tmp/dist1.png",width=400,height=350)
+hist(pbc.df$Time, n=100, main="Time")
+dev.off()
+png(file="/tmp/dist2.png",width=400,height=350)
+hist(pbc.df$Ngeoms, n=100, main="N. of geometries")
+dev.off()
+png(file="/tmp/dist3.png",width=400,height=350)
+hist(pbc.df$Size, n=100, main="Size")
+dev.off()
+png(file="/tmp/dist4.png",width=400,height=350)
+hist(pbc.df$GeomsPerSec, n=100, main="Geometries per sec")
+dev.off()
+
+#
 # 
 # Json vs TJson
 #
@@ -46,26 +63,12 @@ print(model.tables(mod, "means"), digits=3)
 #
 # Size per geom based on Precision and Generalization
 #
-mod<-aov(SizePerGeom~Generalization*Precision, pbc.df)
+mod<-aov(SizePerGeom~Generalization+Precision, pbc.df)
 summary(mod)
 print(model.tables(mod, "means"), digits=3)
 
 #
-# Size per point based on Precision and Generalization
-#
-mod<-aov(SizePerPoint~Generalization*Precision, pbc.df)
-summary(mod)
-print(model.tables(mod, "means"), digits=3)
-
-#
-# Geoms per sec for compression, generazliazation and protocol 
-#
-modThr<-aov(GeomsPerSec~Generalization*Compression*Protocol+SizePerGeom, pbc.df)
-summary(modThr)
-print(model.tables(modThr, "means"), digits=3)
-
-#
-# Geoms per sec by Compression, Protocol and SizePerGeom
+# Geoms per sec by compression, protocol and size per geometry 
 #
 df1<-subset(pbc.df, Compression == "true" & Protocol == "http")
 df2<-subset(pbc.df, Compression == "false" & Protocol == "http")
@@ -89,9 +92,11 @@ points(df4$SizePerGeom, predict(modGeom, df4), cex=0.2)
 
 # Combinaes in one plot 
 par(mfrow=c(1,1))
-plot(pbc.df$SizePerGeom, pbc.df$GeomsPerSec, col="red", cex=0.2, ylim=c(0,2000), xlab="Size per geom", ylab="Geoms per sec")
-points(df1$SizePerGeom, predict(modGeom, df1), cex=0.2, col="red")
+png(file="/tmp/lm.png",width=400,height=350)
+plot(pbc.df$SizePerGeom, pbc.df$GeomsPerSec, col="black", cex=0.2, ylim=c(0,2000), main="Blue HTTP, Green HTTPS", xlab="Size per geom", ylab="Geoms per sec")
+points(df1$SizePerGeom, predict(modGeom, df1), cex=0.2, col="lightblue")
 points(df2$SizePerGeom, predict(modGeom, df2), cex=0.2, col="blue")
 points(df3$SizePerGeom, predict(modGeom, df3), cex=0.2, col="darkgreen")
-points(df4$SizePerGeom, predict(modGeom, df4), cex=0.2, col="darkviolet")
+points(df4$SizePerGeom, predict(modGeom, df4), cex=0.2, col="green")
+dev.off()
 
